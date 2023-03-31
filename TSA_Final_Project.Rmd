@@ -8,22 +8,29 @@ date: "2023-03-31"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## install packages
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r package, message=FALSE, include=FALSE}
+library(lubridate)
+library(ggplot2)
+library(forecast)  
+library(Kendall)
+library(tseries)
+library(outliers)
+library(tidyverse)
+library(smooth)
+library(kableExtra)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+## Dataset Integration
 
-You can also embed plots, for example:
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+library(readxl)
+electricity_consumption <- read_excel(path="../Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
+electricity_consumption<-electricity_consumption[-1,]
+head(electricity_consumption)
+tail(electricity_consumption)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
