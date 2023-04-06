@@ -64,6 +64,8 @@ class(electricity_consumption$`Industrial Sector Electrical System Energy Losses
 electricity_consumption$`Industrial Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
 round(electricity_consumption$`Industrial Sector Electrical System Energy Losses`,digits=3)
 
+colnames(electricity_consumption)<-c('Date','Residential.Primary.Energy','Residential.Energy.Losses','Commercial.Primary.Energy','Commercial.Energy.Losses','Industrial.Primary.Energy','Industrial.Energy.Losses')
+
 head(electricity_consumption)
 ```
 
@@ -115,6 +117,62 @@ summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() 
 
 summary_table
 ```
+
+##Residential Sector
+```{r}
+#Create a dataframe only for Residential
+electricity_consumption_R<-electricity_consumption[,-4:-7]
+colnames(electricity_consumption_R)<-c('Date','Primary.Energy','Energy.Losses')
+
+#Inspect data
+#head(electricity_price)
+nvar <- ncol(electricity_consumption_R) - 1
+nobs <- nrow(electricity_consumption_R)
+#transform 
+ts_electricity_R <- ts(
+  electricity_consumption_R[,2:(nvar+1)],
+  start=c(1973,01,10),end=c(2022,11,01),
+  frequency=12)
+
+```
+
+## Initial Plots
+
+```{r}
+#plot for electricity consumption
+cols<-c("residential"="orange","commercial"="steelblue","industrial"="yellow")
+ts_plot<-ggplot(electricity_consumption)+
+  geom_line(aes(x=Date,y=Residential.Primary.Energy,color="residential"))+
+  ylab(paste0("Electricity Consumption (Trillion BTU)",sep="")) +
+  xlab("Date")+
+  geom_line(aes(x=Date,y=Commercial.Primary.Energy,color="commercial"))+
+  geom_line(aes(x=Date,y=Industrial.Primary.Energy,color="industrial"))+
+  labs(title="Primary Electricity Consumption of Three Sectors")+
+  scale_color_manual(name="series",values = cols)
+plot(ts_plot)
+          
+#plot for energy losses
+cols1<-c("residential"="green","commercial"="red","industrial"="blue")
+ts_plot1<-ggplot(electricity_consumption)+
+  geom_line(aes(x=Date,y=Residential.Energy.Losses,color="residential"))+
+  ylab(paste0("Energy Losses (Trillion BTU)",sep="")) +
+  xlab("Date")+
+  geom_line(aes(x=Date,y=Commercial.Energy.Losses,color="commercial"))+
+  geom_line(aes(x=Date,y=Industrial.Energy.Losses,color="industrial"))+
+  labs(title="Energy Losses of Three Sectors")+
+  scale_color_manual(name="series",values = cols1)
+plot(ts_plot1)
+
+
+#ACF and PACF plots
+par(mfrow=c(1,4))
+ACF_Plot <- Acf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="ACF of Residential Sector Consumption")
+PACF_Plot <- Pacf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="PACF of Residential Sector Consumption")
+ACF_Plot <- Acf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="ACF of Residential Sector Losses")
+PACF_Plot <- Pacf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="PACF of Residential Sector Losses")
+
+```
+
 
 
 
