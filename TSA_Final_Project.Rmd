@@ -118,23 +118,6 @@ summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() 
 summary_table
 ```
 
-##Residential Sector
-```{r}
-#Create a dataframe only for Residential
-electricity_consumption_R<-electricity_consumption[,-4:-7]
-colnames(electricity_consumption_R)<-c('Date','Primary.Energy','Energy.Losses')
-
-#Inspect data
-#head(electricity_price)
-nvar <- ncol(electricity_consumption_R) - 1
-nobs <- nrow(electricity_consumption_R)
-#transform 
-ts_electricity_R <- ts(
-  electricity_consumption_R[,2:(nvar+1)],
-  start=c(1973,01,10),end=c(2022,11,01),
-  frequency=12)
-
-```
 
 ## Initial Plots
 
@@ -163,16 +146,34 @@ ts_plot1<-ggplot(electricity_consumption)+
   scale_color_manual(name="series",values = cols1)
 plot(ts_plot1)
 
+```
 
+###Residential Sector
+```{r}
+#Create a dataframe only for Residential
+electricity_consumption_R<-electricity_consumption[,-4:-7]
+colnames(electricity_consumption_R)<-c('Date','Primary.Energy','Energy.Losses')
+
+#Inspect data
+#head(electricity_price)
+nvar <- ncol(electricity_consumption_R) - 1
+nobs <- nrow(electricity_consumption_R)
+#transform 
+ts_electricity_R <- ts(
+  electricity_consumption_R[,2:(nvar+1)],
+  start=c(1973,01,10),end=c(2022,11,01),
+  frequency=12)
+
+```
+
+##ACF and PACF Plots
+```{r}
 #ACF and PACF plots
 par(mfrow=c(1,4))
 ACF_Plot <- Acf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="ACF of Residential Sector Consumption")
 PACF_Plot <- Pacf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="PACF of Residential Sector Consumption")
 ACF_Plot <- Acf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="ACF of Residential Sector Losses")
 PACF_Plot <- Pacf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="PACF of Residential Sector Losses")
-
 ```
-
-
 
 
