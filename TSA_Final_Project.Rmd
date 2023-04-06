@@ -29,7 +29,7 @@ library(knitr)
 ```{r}
 #Import the excel file
 library(readxl)
-electricity_consumption <- read_excel(path="../Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
+electricity_consumption <- read_excel(path="./Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
 
 #delete the first row with units
 electricity_consumption<-electricity_consumption[-1,]
