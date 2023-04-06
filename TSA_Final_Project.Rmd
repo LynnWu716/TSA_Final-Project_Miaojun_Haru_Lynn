@@ -8,22 +8,113 @@ date: "2023-03-31"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## install packages
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r package, message=FALSE, include=FALSE}
+library(lubridate)
+library(ggplot2)
+library(forecast)  
+library(Kendall)
+library(tseries)
+library(outliers)
+library(tidyverse)
+library(smooth)
+library(kableExtra)
+library(knitr)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+## Dataset Information
 
-You can also embed plots, for example:
+```{r}
+#Import the excel file
+library(readxl)
+electricity_consumption <- read_excel(path="../Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#delete the first row with units
+electricity_consumption<-electricity_consumption[-1,]
+
+#Keep two columns: primary energy consumption and energy losses for three sectors, respectively
+electricity_consumption<-electricity_consumption[,-3][,-3][,-4]
+electricity_consumption<-electricity_consumption[,-5][,-5][,-6]
+electricity_consumption<-electricity_consumption[,-7][,-7][,-8]
+
+#Round to three digits for all columns
+class(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+electricity_consumption$`Primary Energy Consumed by the Residential Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Residential Sector`,digits=3)
+
+class(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+electricity_consumption$`Residential Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Residential Sector Electrical System Energy Losses`,digits=3)
+
+class(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+electricity_consumption$`Primary Energy Consumed by the Commercial Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`,digits=3)
+
+class(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+electricity_consumption$`Commercial Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Commercial Sector Electrical System Energy Losses`,digits=3)
+
+class(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+electricity_consumption$`Primary Energy Consumed by the Industrial Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`,digits=3)
+
+class(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+electricity_consumption$`Industrial Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Industrial Sector Electrical System Energy Losses`,digits=3)
+
+head(electricity_consumption)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#Transform to time series data
+Date_frame<-as.Date(electricity_consumption$Month)
+ts_electricity <- ts(electricity_consumption[,2:7],start=c(1973,01),end=c(2022,11),frequency=12)
+
+#Summary of time series data
+summary_data<-summary(ts_electricity)
+summary_data
+
+#Calculate means, standard deviations, and ranges for each variable
+
+mean_R1<-mean(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+sd_R1<-sd(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+range_R1<-max(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+
+mean_R2<-mean(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+sd_R2<-sd(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+range_R2<-max(electricity_consumption$`Residential Sector Electrical System Energy Losses`)-min(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+
+mean_C1<-mean(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+sd_C1<-sd(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+range_C1<-max(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+
+mean_C2<-mean(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+sd_C2<-sd(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+range_C2<-max(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+
+mean_I1<-mean(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+sd_I1<-sd(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+range_I1<-max(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+
+mean_I2<-mean(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+sd_I2<-sd(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+range_I2<-max(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+
+# Create a table
+summary_df <- data.frame(
+  Variable = c("Residential_Sector_Consumption", "Residential_Sector_Losses", "Commercial_Sector_Consumption", "Commercial_Sector_Losses", "Industrial_Sector_Consumption", "Industrial_Sector_Losses"),
+  Mean = c(584.60,662.45,345.14,605.47,1806.54,576.51),
+  StandardDeviation = c(321.54,185.03,146.90,178.14,146.71,68.86),
+  Range = c(1295.71,819.46,538.31,723.97,800.93,371.76)
+)
+  
+summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() function") %>% 
+  kable_styling(full_width = FALSE, position = "center",latex_options = "hold_position")
+
+summary_table
+```
+
+
+
