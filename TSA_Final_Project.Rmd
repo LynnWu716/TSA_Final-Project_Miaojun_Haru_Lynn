@@ -163,24 +163,27 @@ nobs <- nrow(electricity_consumption_R)
 #transform to time series data
 ts_electricity_R <- ts(
   electricity_consumption_R[,2:(nvar+1)],
-  start=c(1973,01,10),end=c(2022,11,01),
+  start=c(1973,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
 
 ```{r}
 # Create a variable with number of steps ahead we will forecast
-n_for <- 12 #play with this, change to 12, 23, 2 and check of the best model is still the same
+n_for <- 12
 
-ts_forPE_R <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
-               start=c(1973,01,10),
+ts_forPE_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
+               start=c(1973,11,01),end=c(2021,11,01),
                frequency=12)
-last_PE_obs_R <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"] 
 
-ts_forEL_R <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,01,10),
+last_forPE_obs_R_test <- ts(ts_electricity_R[(nobs-n_for):589,"Primary.Energy"],
+               start=c(2021,11,01),end=c(2022,11,01),
                frequency=12)
-last_EL_obs_R <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"] 
+
+#ts_forEL_R <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
+               #start=c(1973,01,01),end=c(2021,11,01),
+               #frequency=12)
+#last_EL_obs_R <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"] 
 ```
 
 
@@ -197,7 +200,7 @@ PACF_Plot <- Pacf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE
 ## Model 1: Arithmetic mean
 ```{r}
 #mean model for primary energy consumption
-MEAN_seas1 <- meanf(y = ts_forPE_R, h = n_for)  
+MEAN_seas1 <- meanf(y = ts_PE_train, h = n_for)  
 checkresiduals(MEAN_seas1)
 plot(MEAN_seas1)
 
@@ -210,7 +213,7 @@ plot(MEAN_seas2)
 ## Model 2: Seasonal naive
 ```{r}
 #seasonal naive model for primary energy consumption
-SNAIVE_seas1 <- snaive(ts_forPE_R, h=n_for, holdout=FALSE)
+SNAIVE_seas1 <- snaive(ts_forPE_R_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas1)
 plot(SNAIVE_seas1)
 
@@ -377,4 +380,220 @@ autoplot(ts_electricity_R[,"Energy.Losses"]) +
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
 ```
+###Commercial Sector
+```{r}
 
+#Create a dataframe only for Residential
+electricity_consumption_C<-electricity_consumption[-2:-3,-6:-7]
+colnames(electricity_consumption_C)<-c('Date','Primary.Energy','Energy.Losses')
+
+#Inspect data
+#head(electricity_price)
+nvar <- ncol(electricity_consumption_C) - 1
+nobs <- nrow(electricity_consumption_C)
+
+#transform to time series data
+ts_electricity_C <- ts(
+  electricity_consumption_C[,2:(nvar+1)],
+  start=c(1973,01,10),end=c(2022,11,01),
+  frequency=12)
+
+```
+
+
+```{r}
+# Create a variable with number of steps ahead we will forecast
+n_for <- 12 #play with this, change to 12, 23, 2 and check of the best model is still the same
+
+ts_forPE_C <- ts(ts_electricity_C[1:(nobs-n_for),"Primary.Energy"],
+               start=c(1973,01,10),
+               frequency=12)
+last_PE_obs_C <- ts_electricity_C[(nobs-n_for+1):nobs,"Primary.Energy"] 
+
+ts_forEL_C <- ts(ts_electricity_C[1:(nobs-n_for),"Energy.Losses"],
+               start=c(1973,01,10),
+               frequency=12)
+last_EL_obs_C <- ts_electricity_C[(nobs-n_for+1):nobs,"Energy.Losses"] 
+```
+
+
+##ACF and PACF Plots
+```{r}
+#ACF and PACF plots
+par(mfrow=c(1,4))
+ACF_Plot <- Acf(electricity_consumption_C$Primary.Energy, lag = 40, plot = TRUE,main="ACF of Commercial Sector Consumption")
+PACF_Plot <- Pacf(electricity_consumption_C$Primary.Energy, lag = 40, plot = TRUE,main="PACF of Commercial Sector Consumption")
+ACF_Plot <- Acf(electricity_consumption_C$Energy.Losses, lag = 40, plot = TRUE,main="ACF of Commercial Sector Losses")
+PACF_Plot <- Pacf(electricity_consumption_C$Energy.Losses, lag = 40, plot = TRUE,main="PACF of Commercial Sector Losses")
+```
+
+## Model 1: Arithmetic mean
+```{r}
+#mean model for primary energy consumption
+MEAN_seas1_C <- meanf(y = ts_forPE_C, h = n_for)  
+checkresiduals(MEAN_seas1_C)
+plot(MEAN_seas1_C)
+
+#mean model for energy losses
+MEAN_seas2_C <- meanf(y = ts_forEL_C, h = n_for)  
+checkresiduals(MEAN_seas2_C)
+plot(MEAN_seas2_C)
+```
+
+## Model 2: Seasonal naive
+```{r}
+#seasonal naive model for primary energy consumption
+SNAIVE_seas1_C <- snaive(ts_forPE_C, h=n_for, holdout=FALSE)
+checkresiduals(SNAIVE_seas1_C)
+plot(SNAIVE_seas1_C)
+
+#seasonal naive model for energy losses
+SNAIVE_seas2_C <- snaive(ts_forEL_C, h=n_for, holdout=FALSE)
+checkresiduals(SNAIVE_seas2_C)
+plot(SNAIVE_seas2_C)
+```
+
+## Model 3: SARIMA
+```{r}
+##SARIMA model for primary energy consumption
+SARIMA_autofit1_C <- auto.arima(ts_forPE_C)
+checkresiduals(SARIMA_autofit1_C)
+
+SARIMA_for1_C <- forecast(SARIMA_autofit1_C,h=n_for)
+plot(SARIMA_for1_C)
+
+##SARIMA model for energy losses
+SARIMA_autofit2_C <- auto.arima(ts_forEL_C)
+checkresiduals(SARIMA_autofit2_C)
+
+SARIMA_for2_C <- forecast(SARIMA_autofit2_C,h=n_for)
+plot(SARIMA_for2_C)
+```
+
+## Fitting State Space Models to the original (seasonal) series
+## Model 4: SS Exponential smoothing
+
+```{r}
+##SSEAS model for primary energy consumption
+SSES_seas1_C <- es(ts_forPE_C,model="ZZZ",h=n_for,holdout=FALSE)
+plot(SSES_seas1_C)
+checkresiduals(SSES_seas1_C)
+
+##SSEAS model for energy losses
+SSES_seas2_C <- es(ts_forEL_C,model="XXX",h=n_for,holdout=FALSE)
+plot(SSES_seas2_C)
+checkresiduals(SSES_seas2_C)
+```
+
+### Model 5: SS with StructTS()
+
+Now let's try to fit one of the three SS models we learned: local level, local linear trend and the basic structure model (BSM). Since we have seasonality we need to go with the BSM. We will use the `StructTS()` function from package `forecast`.
+The function takes a few arguments, here are the important ones:
+
+**x**  time series object
+**type** type of the model. If `type ='level'` R will fit a local level model. If `type ='trend'` R will fit a local linear trend model and if `type ='BSM'` R will fit a basic structural model. If argument is omitted, a BSM is used for a time series with frequency > 1, and a local trend model otherwise.
+**fixed** optional numeric vector with values for the components variances in the following order $fixed=c(\sigma^2_\eta,\sigma^2_\xi,\sigma^2_\omega,\sigma^2_\epsilon)$. The first variance is with respect to level, second is trend, third is seasonal and fourth is observation. If supplied, only NA entries in fixed will be varied. This argument is useful for setting variances to zero.
+
+
+```{r}
+#For primary energy consumption
+SS_seas1_C <- StructTS(ts_forPE_C,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+checkresiduals(SS_seas1_C)
+
+#For energy losses
+ SS_seas2_C<- StructTS(ts_forEL_C,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+checkresiduals(SS_seas2_C)
+
+#Generating forecasts
+SS_for1_C <- forecast(SS_seas1_C,h=n_for)
+plot(SS_for1_C)
+
+SS_for2_C <- forecast(SS_seas2_C,h=n_for)
+plot(SS_for2_C)
+```
+
+
+## Checking accuracy of the five models
+
+```{r}
+#Model 1: Arithmetic mean
+MEAN_scores1_C <- accuracy(MEAN_seas1_C$mean,last_PE_obs_C)
+MEAN_scores2_C <- accuracy(MEAN_seas2_C$mean,last_EL_obs_C)
+
+#Model 2: Seasonal naive 
+SNAIVE_scores1_C<- accuracy(SNAIVE_seas1_C$mean,last_PE_obs_C)
+SNAIVE_scores2_C <- accuracy(SNAIVE_seas2_C$mean,last_EL_obs_C)
+
+# Model 3:  SARIMA 
+SARIMA_scores1_C <- accuracy(SARIMA_for1_C$mean,last_PE_obs_C)
+SARIMA_scores2_C <- accuracy(SARIMA_for2_C$mean,last_EL_obs_C)
+
+# Model 4:  SSES
+SSES_scores1_C <- accuracy(SSES_seas1_C$forecast,last_PE_obs_C)
+SSES_scores2_C <- accuracy(SSES_seas2_C$forecast,last_EL_obs_C)
+
+# Model 5:  BSM 
+SS_scores1_C <- accuracy(SS_for1_C$mean,last_PE_obs_C)
+SS_scores2_C <- accuracy(SS_for2_C$mean,last_EL_obs_C)
+```
+
+```{r}
+#create data frame for primary energy consumption
+seas_scores1_C <- as.data.frame(rbind(MEAN_scores1_C, SNAIVE_scores1_C, SARIMA_scores1_C,SSES_scores1,SS_scores1_C))
+row.names(seas_scores1_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+#choose model with lowest RMSE
+best_model_index1_C <- which.min(seas_scores1_C[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores1_C[best_model_index1_C,]))                       
+                            
+```
+
+```{r}
+kbl_PE_C<-kbl(seas_scores1_C, 
+      caption = "Forecast Accuracy for Commercial Primary Energy Consumption's Seasonal Data",
+      digits = array(5,ncol(seas_scores1_C))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_C[,"RMSE"]))
+kbl_PE_C
+```
+```{r}
+seas_scores2_C <- as.data.frame(rbind(MEAN_scores2_C, SNAIVE_scores2_C, SARIMA_scores2_C,SSES_scores2_C,SS_scores2_C))
+row.names(seas_scores2_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+#choose model with lowest RMSE
+best_model_index2_C <- which.min(seas_scores2_C[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C,])) 
+```
+
+```{r}
+kbl_EL_C<-kbl(seas_scores2_C, 
+      caption = "Forecast Accuracy for Commercial Enegy Losses' Seasonal Data",
+      digits = array(5,ncol(seas_scores2_C))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_C[,"RMSE"]))
+kbl_EL_C
+```
+
+```{r}
+## Plotting everything together
+#Commercial Primary Energy
+autoplot(ts_electricity_C[,"Primary.Energy"]) +
+  autolayer(MEAN_seas1_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1_C$forecast, series="SSES") +
+  autolayer(SS_for1_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+```{r}
+#Commercial Energy Losses
+autoplot(ts_electricity_C[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_C$forecast, series="SSES") +
+  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
