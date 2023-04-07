@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 ---
 title: "TSA_FinalProject_Coding"
 output: html_document
@@ -329,3 +330,385 @@ ACF_I_loss <- Acf(I_electricity_consumption$Industrial.Energy.Losses, lag = 40, 
 PACF_I_loss <- Pacf(I_electricity_consumption$Industrial.Energy.Losses, lag = 40, plot = TRUE,main="PACF of Industrial Sector Losses")
 ```
 
+=======
+---
+title: "TSA_FinalProject_Coding"
+output: html_document
+date: "2023-03-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## install packages
+
+```{r package, message=FALSE, include=FALSE}
+library(lubridate)
+library(ggplot2)
+library(forecast)  
+library(Kendall)
+library(tseries)
+library(outliers)
+library(tidyverse)
+library(smooth)
+library(kableExtra)
+library(knitr)
+library(forecast)
+
+```
+
+## Dataset Information
+
+```{r}
+#Import the excel file
+library(readxl)
+electricity_consumption <- read_excel(path="../Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
+
+#delete the first row with units
+electricity_consumption<-electricity_consumption[-1,]
+
+#Keep two columns: primary energy consumption and energy losses for three sectors, respectively
+electricity_consumption<-electricity_consumption[,-3][,-3][,-4]
+electricity_consumption<-electricity_consumption[,-5][,-5][,-6]
+electricity_consumption<-electricity_consumption[,-7][,-7][,-8]
+
+#Round to three digits for all columns
+class(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+electricity_consumption$`Primary Energy Consumed by the Residential Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Residential Sector`,digits=3)
+
+class(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+electricity_consumption$`Residential Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Residential Sector Electrical System Energy Losses`,digits=3)
+
+class(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+electricity_consumption$`Primary Energy Consumed by the Commercial Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`,digits=3)
+
+class(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+electricity_consumption$`Commercial Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Commercial Sector Electrical System Energy Losses`,digits=3)
+
+class(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+electricity_consumption$`Primary Energy Consumed by the Industrial Sector` <- as.numeric(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+round(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`,digits=3)
+
+class(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+electricity_consumption$`Industrial Sector Electrical System Energy Losses` <- as.numeric(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+round(electricity_consumption$`Industrial Sector Electrical System Energy Losses`,digits=3)
+
+colnames(electricity_consumption)<-c('Date','Residential.Primary.Energy','Residential.Energy.Losses','Commercial.Primary.Energy','Commercial.Energy.Losses','Industrial.Primary.Energy','Industrial.Energy.Losses')
+
+head(electricity_consumption)
+```
+
+```{r}
+#Transform to time series data
+Date_frame<-as.Date(electricity_consumption$Month)
+ts_electricity <- ts(electricity_consumption[,2:7],start=c(1973,01),end=c(2022,11),frequency=12)
+
+#Summary of time series data
+summary_data<-summary(ts_electricity)
+summary_data
+
+#Calculate means, standard deviations, and ranges for each variable
+
+mean_R1<-mean(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+sd_R1<-sd(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+range_R1<-max(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+
+mean_R2<-mean(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+sd_R2<-sd(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+range_R2<-max(electricity_consumption$`Residential Sector Electrical System Energy Losses`)-min(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+
+mean_C1<-mean(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+sd_C1<-sd(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+range_C1<-max(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+
+mean_C2<-mean(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+sd_C2<-sd(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+range_C2<-max(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+
+mean_I1<-mean(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+sd_I1<-sd(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+range_I1<-max(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+
+mean_I2<-mean(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+sd_I2<-sd(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+range_I2<-max(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+
+# Create a table
+summary_df <- data.frame(
+  Variable = c("Residential_Sector_Consumption", "Residential_Sector_Losses", "Commercial_Sector_Consumption", "Commercial_Sector_Losses", "Industrial_Sector_Consumption", "Industrial_Sector_Losses"),
+  Mean = c(584.60,662.45,345.14,605.47,1806.54,576.51),
+  StandardDeviation = c(321.54,185.03,146.90,178.14,146.71,68.86),
+  Range = c(1295.71,819.46,538.31,723.97,800.93,371.76)
+)
+  
+summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() function") %>% 
+  kable_styling(full_width = FALSE, position = "center",latex_options = "hold_position")
+
+summary_table
+```
+
+
+## Initial Plots
+
+```{r}
+#plot for electricity consumption
+cols<-c("residential"="orange","commercial"="steelblue","industrial"="yellow")
+ts_plot<-ggplot(electricity_consumption)+
+  geom_line(aes(x=Date,y=Residential.Primary.Energy,color="residential"))+
+  ylab(paste0("Electricity Consumption (Trillion BTU)",sep="")) +
+  xlab("Date")+
+  geom_line(aes(x=Date,y=Commercial.Primary.Energy,color="commercial"))+
+  geom_line(aes(x=Date,y=Industrial.Primary.Energy,color="industrial"))+
+  labs(title="Primary Electricity Consumption of Three Sectors")+
+  scale_color_manual(name="series",values = cols)
+plot(ts_plot)
+          
+#plot for energy losses
+cols1<-c("residential"="green","commercial"="red","industrial"="blue")
+ts_plot1<-ggplot(electricity_consumption)+
+  geom_line(aes(x=Date,y=Residential.Energy.Losses,color="residential"))+
+  ylab(paste0("Energy Losses (Trillion BTU)",sep="")) +
+  xlab("Date")+
+  geom_line(aes(x=Date,y=Commercial.Energy.Losses,color="commercial"))+
+  geom_line(aes(x=Date,y=Industrial.Energy.Losses,color="industrial"))+
+  labs(title="Energy Losses of Three Sectors")+
+  scale_color_manual(name="series",values = cols1)
+plot(ts_plot1)
+
+```
+
+###Residential Sector
+```{r}
+#Create a dataframe only for Residential
+electricity_consumption_R<-electricity_consumption[,-4:-7]
+colnames(electricity_consumption_R)<-c('Date','Primary.Energy','Energy.Losses')
+
+#Inspect data
+#head(electricity_price)
+nvar <- ncol(electricity_consumption_R) - 1
+nobs <- nrow(electricity_consumption_R)
+
+#transform to time series data
+ts_electricity_R <- ts(
+  electricity_consumption_R[,2:(nvar+1)],
+  start=c(1973,01,10),end=c(2022,11,01),
+  frequency=12)
+
+```
+
+```{r}
+# Create a variable with number of steps ahead we will forecast
+n_for <- 12 #play with this, change to 12, 23, 2 and check of the best model is still the same
+
+ts_forPE_R <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
+               start=c(1973,01,10),
+               frequency=12)
+last_PE_obs_R <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"] 
+
+ts_forEL_R <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
+               start=c(1973,01,10),
+               frequency=12)
+last_EL_obs_R <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"] 
+```
+
+
+##ACF and PACF Plots
+```{r}
+#ACF and PACF plots
+par(mfrow=c(1,4))
+ACF_Plot <- Acf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="ACF of Residential Sector Consumption")
+PACF_Plot <- Pacf(electricity_consumption_R$Primary.Energy, lag = 40, plot = TRUE,main="PACF of Residential Sector Consumption")
+ACF_Plot <- Acf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="ACF of Residential Sector Losses")
+PACF_Plot <- Pacf(electricity_consumption_R$Energy.Losses, lag = 40, plot = TRUE,main="PACF of Residential Sector Losses")
+```
+
+## Model 1: Arithmetic mean
+```{r}
+#mean model for primary energy consumption
+MEAN_seas1 <- meanf(y = ts_forPE_R, h = n_for)  
+checkresiduals(MEAN_seas1)
+plot(MEAN_seas1)
+
+#mean model for energy losses
+MEAN_seas2 <- meanf(y = ts_forEL_R, h = n_for)  
+checkresiduals(MEAN_seas2)
+plot(MEAN_seas2)
+```
+
+## Model 2: Seasonal naive
+```{r}
+#seasonal naive model for primary energy consumption
+SNAIVE_seas1 <- snaive(ts_forPE_R, h=n_for, holdout=FALSE)
+checkresiduals(SNAIVE_seas1)
+plot(SNAIVE_seas1)
+
+#seasonal naive model for energy losses
+SNAIVE_seas2 <- snaive(ts_forEL_R, h=n_for, holdout=FALSE)
+checkresiduals(SNAIVE_seas2)
+plot(SNAIVE_seas2)
+```
+
+## Model 3: SARIMA
+```{r}
+##SARIMA model for primary energy consumption
+SARIMA_autofit1 <- auto.arima(ts_forPE_R)
+checkresiduals(SARIMA_autofit1)
+
+SARIMA_for1 <- forecast(SARIMA_autofit1,h=n_for)
+plot(SARIMA_for1)
+
+##SARIMA model for energy losses
+SARIMA_autofit2 <- auto.arima(ts_forEL_R)
+checkresiduals(SARIMA_autofit2)
+
+SARIMA_for2 <- forecast(SARIMA_autofit2,h=n_for)
+plot(SARIMA_for2)
+```
+
+## Fitting State Space Models to the original (seasonal) series
+## Model 4: SS Exponential smoothing
+
+```{r}
+##SSEAS model for primary energy consumption
+SSES_seas1 <- es(ts_forPE_R,model="ZZZ",h=n_for,holdout=FALSE)
+plot(SSES_seas1)
+checkresiduals(SSES_seas1)
+
+##SSEAS model for energy losses
+SSES_seas2 <- es(ts_forEL_R,model="XXX",h=n_for,holdout=FALSE)
+plot(SSES_seas2)
+checkresiduals(SSES_seas2)
+```
+
+### Model 5: SS with StructTS()
+
+Now let's try to fit one of the three SS models we learned: local level, local linear trend and the basic structure model (BSM). Since we have seasonality we need to go with the BSM. We will use the `StructTS()` function from package `forecast`.
+The function takes a few arguments, here are the important ones:
+
+**x**  time series object
+**type** type of the model. If `type ='level'` R will fit a local level model. If `type ='trend'` R will fit a local linear trend model and if `type ='BSM'` R will fit a basic structural model. If argument is omitted, a BSM is used for a time series with frequency > 1, and a local trend model otherwise.
+**fixed** optional numeric vector with values for the components variances in the following order $fixed=c(\sigma^2_\eta,\sigma^2_\xi,\sigma^2_\omega,\sigma^2_\epsilon)$. The first variance is with respect to level, second is trend, third is seasonal and fourth is observation. If supplied, only NA entries in fixed will be varied. This argument is useful for setting variances to zero.
+
+
+```{r}
+#For primary energy consumption
+SS_seas1 <- StructTS(ts_forPE_R,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+checkresiduals(SS_seas1)
+
+#For energy losses
+SS_seas2 <- StructTS(ts_forEL_R,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+checkresiduals(SS_seas2)
+
+#Generating forecasts
+SS_for1 <- forecast(SS_seas1,h=n_for)
+plot(SS_for1)
+
+SS_for2 <- forecast(SS_seas2,h=n_for)
+plot(SS_for2)
+```
+
+
+## Checking accuracy of the five models
+
+```{r}
+#Model 1: Arithmetic mean
+MEAN_scores1 <- accuracy(MEAN_seas1$mean,last_PE_obs_R)
+MEAN_scores2 <- accuracy(MEAN_seas2$mean,last_EL_obs_R)
+
+#Model 2: Seasonal naive 
+SNAIVE_scores1 <- accuracy(SNAIVE_seas1$mean,last_PE_obs_R)
+SNAIVE_scores2 <- accuracy(SNAIVE_seas2$mean,last_EL_obs_R)
+
+# Model 3:  SARIMA 
+SARIMA_scores1 <- accuracy(SARIMA_for1$mean,last_PE_obs_R)
+SARIMA_scores2 <- accuracy(SARIMA_for2$mean,last_EL_obs_R)
+
+# Model 4:  SSES
+SSES_scores1 <- accuracy(SSES_seas1$forecast,last_PE_obs_R)
+SSES_scores2 <- accuracy(SSES_seas2$forecast,last_EL_obs_R)
+
+# Model 5:  BSM 
+SS_scores1 <- accuracy(SS_for1$mean,last_PE_obs_R)
+SS_scores2 <- accuracy(SS_for2$mean,last_EL_obs_R)
+```
+
+## Compare performance metrics
+
+````{r}
+#create data frame for primary energy consumption
+seas_scores1 <- as.data.frame(rbind(MEAN_scores1, SNAIVE_scores1, SARIMA_scores1,SSES_scores1,SS_scores1))
+row.names(seas_scores1) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+
+#choose model with lowest RMSE
+best_model_index1 <- which.min(seas_scores1[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores1[best_model_index1,]))                       
+                            
+```
+
+```{r}
+
+kbl_PE_R<-kbl(seas_scores1, 
+      caption = "Forecast Accuracy for Residential Primary Energy Consumption's Seasonal Data",
+      digits = array(5,ncol(seas_scores1))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1[,"RMSE"]))
+
+kbl_PE_R
+```
+
+````{r}
+#create data frame for residential energy losses
+seas_scores2 <- as.data.frame(rbind(MEAN_scores2, SNAIVE_scores2, SARIMA_scores2,SSES_scores2,SS_scores2))
+row.names(seas_scores2) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+
+#choose model with lowest RMSE
+best_model_index2 <- which.min(seas_scores2[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2,]))                       
+                            
+```
+
+```{r}
+
+kbl_EL_R<-kbl(seas_scores2, 
+      caption = "Forecast Accuracy for Residential Enegy Losses' Seasonal Data",
+      digits = array(5,ncol(seas_scores2))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2[,"RMSE"]))
+
+kbl_EL_R
+```
+
+## Plotting everything together
+
+```{r}
+#Residential Primary Energy
+autoplot(ts_electricity_R[,"Primary.Energy"]) +
+  autolayer(MEAN_seas1, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1$forecast, series="SSES") +
+  autolayer(SS_for1,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+```{r}
+#Residential Energy Losses
+autoplot(ts_electricity_R[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2$forecast, series="SSES") +
+  autolayer(SS_for2,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+>>>>>>> 761f995c2ebdb0e2b62e613ccfe5bbc4ca1f8cc3
