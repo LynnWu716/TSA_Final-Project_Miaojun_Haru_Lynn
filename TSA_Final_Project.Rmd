@@ -363,7 +363,7 @@ library(forecast)
 ```{r}
 #Import the excel file
 library(readxl)
-electricity_consumption <- read_excel(path="../Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
+electricity_consumption <- read_excel(path="./Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
 
 #delete the first row with units
 electricity_consumption<-electricity_consumption[-1,]
@@ -416,33 +416,48 @@ summary_data
 
 mean_R1<-mean(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
 sd_R1<-sd(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+max_R1<-max(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
+min_R1<-min(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
 range_R1<-max(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Residential Sector`)
 
 mean_R2<-mean(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
 sd_R2<-sd(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+max_R2<-max(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
+min_R2<-min(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
 range_R2<-max(electricity_consumption$`Residential Sector Electrical System Energy Losses`)-min(electricity_consumption$`Residential Sector Electrical System Energy Losses`)
 
 mean_C1<-mean(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
 sd_C1<-sd(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+max_C1<- max(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
+min_C1<- min(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
 range_C1<-max(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Commercial Sector`)
 
 mean_C2<-mean(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
 sd_C2<-sd(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+max_C2<- max(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
+min_C2<- min(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
 range_C2<-max(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Commercial Sector Electrical System Energy Losses`)
 
 mean_I1<-mean(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
 sd_I1<-sd(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+max_I1<-max(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
+min_I1<-min(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
 range_I1<-max(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)-min(electricity_consumption$`Primary Energy Consumed by the Industrial Sector`)
 
 mean_I2<-mean(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
 sd_I2<-sd(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+max_I2<-max(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
+min_I2<-min(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
 range_I2<-max(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)-min(electricity_consumption$`Industrial Sector Electrical System Energy Losses`)
-
+```
+```{r}
 # Create a table
 summary_df <- data.frame(
   Variable = c("Residential_Sector_Consumption", "Residential_Sector_Losses", "Commercial_Sector_Consumption", "Commercial_Sector_Losses", "Industrial_Sector_Consumption", "Industrial_Sector_Losses"),
   Mean = c(584.60,662.45,345.14,605.47,1806.54,576.51),
   StandardDeviation = c(321.54,185.03,146.90,178.14,146.71,68.86),
+  Max = c(1488.0, 1144.8,703.6,982.2,2267,776.8),
+  Min = c(192.3,325.3,165.3,258.2,1466,405.0),
   Range = c(1295.71,819.46,538.31,723.97,800.93,371.76)
 )
   
@@ -451,6 +466,7 @@ summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() 
 
 summary_table
 ```
+
 
 
 ## Initial Plots
