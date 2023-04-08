@@ -403,7 +403,7 @@ colnames(electricity_consumption)<-c('Date','Residential.Primary.Energy','Reside
 head(electricity_consumption)
 ```
 
-```{r}
+```{r,message=FALSE, include=FALSE}
 #Transform to time series data
 Date_frame<-as.Date(electricity_consumption$Month)
 ts_electricity <- ts(electricity_consumption[,2:7],start=c(1973,01),end=c(2022,11),frequency=12)
