@@ -912,7 +912,7 @@ autoplot(ts_electricity_I[,"Energy.Losses"]) +
   guides(colour=guide_legend(title="Forecast"))
 ```
 
-### Fit Best Model 
+### Fit Best Model for Industrial Sector
 ```{r}
 #Now fit BSM (the best model) using the entire dataset for PE consumption in industrial sector 
 
