@@ -180,6 +180,17 @@ ts_electricity_R <- ts(
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
 
+ts_electricity_R_PE_test <- ts(
+  electricity_consumption_R[,2],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
+
+ts_electricity_R_EL_test <- ts(
+  electricity_consumption_R[,3],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
 ```
 
 ```{r}
@@ -332,8 +343,8 @@ best_model_index1_RMSE <- which.min(seas_scores1[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores1[best_model_index1_RMSE,]))        
 
 #choose model with lowest MAPE
-best_model_index1_MAPE <- which.min(seas_scores1[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores1[best_model_index1_MAPE,]))     
+# best_model_index1_MAPE <- which.min(seas_scores1[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores1[best_model_index1_MAPE,]))     
                             
 ```
 
@@ -357,9 +368,9 @@ row.names(seas_scores2) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 best_model_index2_RMSE <- which.min(seas_scores2[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2_RMSE,]))      
 
-#choose model with lowest MAPE
-best_model_index2_MAPE <- which.min(seas_scores2[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores2[best_model_index2_MAPE,]))  
+# #choose model with lowest MAPE
+# best_model_index2_MAPE <- which.min(seas_scores2[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores2[best_model_index2_MAPE,]))  
                             
 ```
 
@@ -386,6 +397,16 @@ autoplot(ts_electricity_R[,"Primary.Energy"]) +
   autolayer(SS_for1,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
+
+#Residential Primary Energy - only last year
+autoplot(ts_electricity_R_PE_test) +
+  autolayer(MEAN_seas1, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1$forecast, series="SSES") +
+  autolayer(SS_for1,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
 ```
 
 ```{r}
@@ -398,18 +419,19 @@ autoplot(ts_electricity_R[,"Energy.Losses"]) +
   autolayer(SS_for2,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
-```
-```{r}
-#Residential Primary Energy - only last year
-autoplot(last_forPE_obs_R_test) +
-  autolayer(MEAN_seas1, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas1, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for1,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas1$forecast, series="SSES") +
-  autolayer(SS_for1,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+
+#Residential Energy Losses - only last year
+autoplot(ts_electricity_R_EL_test) +
+  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2$forecast, series="SSES") +
+  autolayer(SS_for2,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
+
 ```
+
 
 
 
@@ -432,6 +454,18 @@ ts_electricity_C <- ts(
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
 
+ts_electricity_C_PE_test <- ts(
+  electricity_consumption_C[,2],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
+
+ts_electricity_C_EL_test <- ts(
+  electricity_consumption_C[,3],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
+
 ```
 
 
@@ -445,7 +479,7 @@ ts_forPE_C_train <- ts(ts_electricity_C[1:(nobs-n_for),"Primary.Energy"],
 last_PE_obs_C_test <- ts_electricity_C[(nobs-n_for+1):nobs,"Primary.Energy"] 
 
 ts_forEL_C_train <- ts(ts_electricity_C[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,01,10),
+               start=c(1973,02,01),
                frequency=12)
 last_EL_obs_C_test <- ts_electricity_C[(nobs-n_for+1):nobs,"Energy.Losses"] 
 ```
@@ -577,9 +611,9 @@ row.names(seas_scores1_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 best_model_index1_C_RMSE <- which.min(seas_scores1_C[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores1_C[best_model_index1_C_RMSE,]))   
 
-#choose model with lowest MAPE
-best_model_index1_C_MAPE <- which.min(seas_scores1_C[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores1_C[best_model_index1_C_MAPE,]))     
+# #choose model with lowest MAPE
+# best_model_index1_C_MAPE <- which.min(seas_scores1_C[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores1_C[best_model_index1_C_MAPE,]))     
       
                             
 ```
@@ -599,8 +633,8 @@ row.names(seas_scores2_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 best_model_index2_C_RMSE <- which.min(seas_scores2_C[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C,])) 
 #choose model with lowest MAPE
-best_model_index2_C_MAPE <- which.min(seas_scores2_C[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores2_C[best_model_index2_C,]))  
+# best_model_index2_C_MAPE <- which.min(seas_scores2_C[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores2_C[best_model_index2_C,]))  
 ```
 
 ```{r}
@@ -623,10 +657,30 @@ autoplot(ts_electricity_C[,"Primary.Energy"]) +
   autolayer(SS_for1_C,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
+
+# Only last year
+autoplot(ts_electricity_C_PE_test) +
+  autolayer(MEAN_seas1_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1_C$forecast, series="SSES") +
+  autolayer(SS_for1_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
 ```
 ```{r}
 #Commercial Energy Losses
 autoplot(ts_electricity_C[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_C$forecast, series="SSES") +
+  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+
+#Commercial Energy Losses - only last year
+autoplot(ts_electricity_C_EL_test) +
   autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
   autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
   autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
@@ -651,6 +705,17 @@ ts_electricity_I <- ts(
   electricity_consumption_I[,2:(nvar+1)],
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
+
+ts_electricity_I_PE_test <- ts(
+  electricity_consumption_I[,2],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
+ts_electricity_I_EL_test <- ts(
+  electricity_consumption_I[,3],
+  start=c(2021,11,01),end=c(2022,11,01),
+  frequency=12)
+
 ```
 
 ```{r}
@@ -708,33 +773,30 @@ plot(SNAIVE_seas2_I)
 ```{r}
 # decompose_forPE_I_train<- decompose(ts_forPE_I_train)
 # plot(decompose_forPE_I_train)
-# 
+
 # deseasonal_forPE_I_train <- seasadj(decompose_forPE_I_train) 
-# plot(decompose_forPE_I_train)
-
-# deseasonal_PE_train_I=seasadj(decompose(ts_forPE_I_train))
+# plot(deseasonal_forPE_I_train)
 # 
-# plot(ts_forPE_I_train, type="l",xlab="Year", ylab="Monthly energy consumption")
-# lines(deseasonal_PE_train_I, col="blue")
-# legend(2000, 60000, legend=c("original data","deseasonalized data"), col=c("black","blue"),lty=1:1,cex=0.8)
+# #deseasonal_PE_train_I=seasadj(decompose(ts_forPE_I_train))
 # 
-# #calculate the coefficients for our model
-# ARIMA_deseasonal_PE_train_I=auto.arima(deseasonal_PE_train_I,max.D=0, max.P=0, max.Q=0) #set the seasonal components to zero
+# # #calculate the coefficients for our model
+# ARIMA_deseasonal_PE_train_I=auto.arima(deseasonal_forPE_I_train,max.D=0, max.P=0, max.Q=0) #set the seasonal components to zero
+#  
+# # #use the coefficients to do forecasting
+# nonseas_ARIMA_PE_I=forecast(ARIMA_deseasonal_PE_train_I, h=12) #Here, I forecast 12 months ahead of time
+# plot(nonseas_ARIMA_PE_I)
 # 
-# #use the coefficients to do forecasting
-# nonseas_ARIMA_PE_I=forecast(ARIMA_deseasonal_PE_train_I, h=12) #h stands for steps of forecast. Here, I forecast 12 months ahead of time
-# plot(ARIMA_forecast_PE_I)
-
 # full_deseason_PE_I=seasadj(decompose(ts_electricity_I))
-# 
+
 # #put the seasonality back
 # seasonality=ts_electricity_I-full_deseason_PE_I #the seasonal component
-# 
-# #append the nonseasonal forecast values for 2010 to the deseasonalized series (2000-2009) and #put the seasonality back to forecasted values
+# # 
+# # #append the nonseasonal forecast values for 2010 to the deseasonalized series (2000-2009) and #put the seasonality back to forecasted values
 # nonseas_ARIMA_forecast_full=append(deseasonal_PE_train_I,ARIMA_forecast_PE_I$mean)+seasonality
 # 
 # #turn the nonseasonal-forecast with seasonality added into a time series
-# ts(nonseas_ARIMA_forecast_full, frequency=12,start=c(1973,02,01))
+# ts_ARIMA_Seas_Forecast <- ts(nonseas_ARIMA_forecast_full[,"ts_electricity_I.Primary.Energy"], frequency=12,start=c(1973,02,01))
+# plot(ts_ARIMA_Seas_Forecast)
 
 
 ```
@@ -827,10 +889,10 @@ row.names(seas_scores1_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 best_model_index1_I_RMSE <- which.min(seas_scores1_I[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores1_I[best_model_index1_I_RMSE,]))        
 
-#choose model with lowest MAPE
-best_model_index1_I_MAPE <- which.min(seas_scores1[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores1[best_model_index1_I_MAPE,]))     
-                            
+# #choose model with lowest MAPE
+# best_model_index1_I_MAPE <- which.min(seas_scores1[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores1[best_model_index1_I_MAPE,]))     
+#                             
 ```
 
 ```{r}
@@ -854,9 +916,9 @@ row.names(seas_scores2_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 best_model_index2_I_RMSE <- which.min(seas_scores2_I[,"RMSE"])
 cat("The best model by RMSE is:", row.names(seas_scores2_I[best_model_index2_I_RMSE,]))      
 
-#choose model with lowest MAPE
-best_model_index2_I_MAPE <- which.min(seas_scores2_I[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores2_I[best_model_index2_I_MAPE,]))  
+# #choose model with lowest MAPE
+# best_model_index2_I_MAPE <- which.min(seas_scores2_I[,"MAPE"])
+# cat("The best model by MAPE is:", row.names(seas_scores2_I[best_model_index2_I_MAPE,]))  
                             
 ```
 
@@ -883,12 +945,33 @@ autoplot(ts_electricity_I[,"Primary.Energy"]) +
   autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
+
+#Industrial Primary Energy - only last year
+autoplot(ts_electricity_I_PE_test) +
+  autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1_I$forecast, series="SSES") +
+  autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+
 ```
 
 
-```{r}
+```{r} 
 #Industrial Energy Losses
 autoplot(ts_electricity_I[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_I$forecast, series="SSES") +
+  autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+
+#Industrial Energy Losses - only last year
+autoplot(ts_electricity_I_EL_test) +
   autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
   autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
   autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
