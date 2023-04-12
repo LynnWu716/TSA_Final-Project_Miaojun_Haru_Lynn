@@ -747,7 +747,7 @@ PACF_Plot <- Pacf(electricity_consumption_I$Energy.Losses, lag = 40, plot = TRUE
 ## Model 1: Arithmetic mean
 ```{r}
 #mean model for primary energy consumption
-MEAN_seas1_I <- meanf(y = ts_forPE_I_train, h = n_for)  
+MEAN_seas1_I <- meanf(y = ts_forPE_I_train, h =n_for)  
 checkresiduals(MEAN_seas1_I)
 plot(MEAN_seas1_I)
 
@@ -996,8 +996,8 @@ BSM_entire_PE_I <- StructTS(ts_electricity_I_PE,
                     type="BSM",fixed=c(NA,NA,NA,NA))
 checkresiduals(BSM_entire_PE_I )
 
-#Generating forecast
-BSM_entire_forecast1_I <- forecast(BSM_entire_PE_I,h=n_for)
+#Generating forecast for the next ten years for the primary energy consumption
+BSM_entire_forecast1_I <- forecast(BSM_entire_PE_I,h=120)
 plot(BSM_entire_forecast1_I)
 
 ```
@@ -1013,12 +1013,11 @@ ts_electricity_I_EL <- ts(
   frequency=12)
 
 #For energy loss 
-SARIMA_entire_EL_I <- StructTS(ts_electricity_I_EL,
-                    type="BSM",fixed=c(NA,NA,NA,NA))
+SARIMA_entire_EL_I <- auto.arima(ts_electricity_I_EL)
 checkresiduals(SARIMA_entire_EL_I )
 
-#Generating forecasts
-SARIMA_entire_forecast2_I <- forecast(SARIMA_entire_EL_I,h=n_for)
+#Generating forecasts for the next ten years of energy losses
+SARIMA_entire_forecast2_I <- forecast(SARIMA_entire_EL_I,h=120)
 plot(SARIMA_entire_forecast2_I)
 ```
 
