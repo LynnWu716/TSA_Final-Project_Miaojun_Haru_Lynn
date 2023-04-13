@@ -400,6 +400,7 @@ autoplot(ts_electricity_R[,"Energy.Losses"]) +
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
 ```
+
 ```{r}
 #Residential Primary Energy - only last year
 
@@ -409,7 +410,21 @@ autoplot(last_forPE_obs_R_test) +
   autolayer(SARIMA_for1,PI=FALSE, series="SARIMA") +
   autolayer(SSES_seas1$forecast, series="SSES") +
   autolayer(SS_for1,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  xlab("Month") + ylab("Primary Energy Consumption 2021-2022 (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast"))
+
+```
+
+```{r}
+#Residential Energy Losses - only last year
+
+autoplot(last_EL_obs_R_test) +
+  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2$forecast, series="SSES") +
+  autolayer(SS_for2,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Energy Losses 2021-2022 (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
 
 ```
