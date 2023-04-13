@@ -430,49 +430,44 @@ autoplot(last_EL_obs_R_test) +
 ```
 
 
-```{r}
-cols_R<-c("Mean"="lightblue","Naïve"="gray","SARIMA"="lightgreen","SSES"="lightyellow","BSM"="lightpink")
-plot_R<-ggplot(last_forPE_obs_R_test)+
-  geom_line(aes(x=Date,y=MEAN_seas1,color="Mean"))+
-  ylab(paste0("Primary Energy Consumption 2021-2022 (Trillion BTU)",sep="")) +
-  xlab("Date")+
-  geom_line(aes(x=Date,y=SNAIVE_seas1,color="Naïve"))+
-  geom_line(aes(x=Date,y=SARIMA_for1,color="SARIMA"))+
-  geom_line(aes(x=Date,y=SSES_seas1$forecast,color="SSES"))+
-  geom_line(aes(x=Date,y=SS_for1,color="BSM"))+
-  labs(title="Primary Energy Consumption of Residential Sector in 2021-2022")+
-  scale_color_manual(name="series",values = cols_R)
-```
-
-
-
 ### Fit Best Model 
 ```{r}
 #Now fit SSES (the best model) using the entire data set for PE consumption in residential sector 
 
 #transform to time series data FOR Primary Energy Consumption
 ts_electricity_R_entire_Consumption <- ts(
-  electricity_consumption_I[,2],
+  electricity_consumption_R[,2],
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
 
 #transform to time series data FOR Energy Losses
 ts_electricity_R_entire_Losses <- ts(
-  electricity_consumption_I[,3],
+  electricity_consumption_R[,3],
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
 
 #SSES forecast for both variables in residential sector
+##SSEAS model for primary energy consumption for future ten years
 n_for2<-120
-SARIMA_autofit3 <- auto.arima(ts_electricity_R_entire_Consumption)
-checkresiduals(SARIMA_autofit3)
-SARIMA_for3 <- forecast(SARIMA_autofit1,h=n_for2)
-plot(SARIMA_for3)
+SSES_seas3 <- es(ts_electricity_R_entire_Consumption,model="ZZZ",h=n_for2,holdout=FALSE)
+plot(SSES_seas3$forecast)
+checkresiduals(SSES_seas3)
 
-SARIMA_autofit4 <- auto.arima(ts_electricity_R_entire_Losses)
-checkresiduals(SARIMA_autofit4)
-SARIMA_for4 <- forecast(SARIMA_autofit4,h=n_for2)
-plot(SARIMA_for4)
+##SSEAS model for energy losses for future ten years
+SSES_seas4 <- es(ts_electricity_R_entire_Losses,model="XXX",h=n_for2,holdout=FALSE)
+plot(SSES_seas2)
+checkresiduals(SSES_seas4)
+
+
+autoplot(ts_electricity_R_entire_Consumption) +
+  autolayer(SSES_seas3$forecast, series="SSES") +
+  xlab("Month") + ylab("Primary Energy Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
+
+autoplot(ts_electricity_R_entire_Losses) +
+  autolayer(SSES_seas4$forecast, series="SSES") +
+  xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
 
@@ -978,7 +973,7 @@ BSM_entire_PE_I <- StructTS(ts_electricity_I_PE,
 checkresiduals(BSM_entire_PE_I )
 
 #Generating forecast
-BSM_entire_forecast1_I <- forecast(BSM_entire_PE_I,h=n_for)
+BSM_entire_forecast1_I <- forecast(BSM_entire_PE_I,h=n_for2)
 plot(BSM_entire_forecast1_I)
 
 ```
@@ -999,7 +994,7 @@ SARIMA_entire_EL_I <- StructTS(ts_electricity_I_EL,
 checkresiduals(SARIMA_entire_EL_I )
 
 #Generating forecasts
-SARIMA_entire_forecast2_I <- forecast(SARIMA_entire_EL_I,h=n_for)
+SARIMA_entire_forecast2_I <- forecast(SARIMA_entire_EL_I,h=n_for2)
 plot(SARIMA_entire_forecast2_I)
 ```
 
