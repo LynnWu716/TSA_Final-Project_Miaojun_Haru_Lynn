@@ -1,6 +1,8 @@
 ---
 title: "TSA_FinalProject_Coding"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 date: "2023-03-31"
 ---
 
@@ -670,10 +672,10 @@ seas_scores2_C <- as.data.frame(rbind(MEAN_scores2_C, SNAIVE_scores2_C, SARIMA_s
 row.names(seas_scores2_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 #choose model with lowest RMSE
 best_model_index2_C_RMSE <- which.min(seas_scores2_C[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C,])) 
+cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C_RMSE,])) 
 #choose model with lowest MAPE
 # best_model_index2_C_MAPE <- which.min(seas_scores2_C[,"MAPE"])
-# cat("The best model by MAPE is:", row.names(seas_scores2_C[best_model_index2_C,]))  
+# cat("The best model by MAPE is:", row.names(seas_scores2_C[best_model_index2_C_RMSE,]))  
 ```
 
 ```{r}
@@ -707,6 +709,7 @@ autoplot(ts_electricity_C_PE_test) +
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
 ```
+
 ```{r}
 #Commercial Energy Losses
 autoplot(ts_electricity_C[,"Energy.Losses"]) +
@@ -727,6 +730,43 @@ autoplot(ts_electricity_C_EL_test) +
   autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast"))
+```
+
+```{r}
+#Now fit SARIMA (the best model) using the entire dataset for PE consumption in commercial sector
+
+#Create a ts object for the entire PE consumption
+ts_electricity_C_PE <- ts(
+  electricity_consumption_C[,2],
+  start=c(1973,02,01),end=c(2022,11,01),
+  frequency=12)
+
+#For PE energy consumption
+SARIMA_entire_PE_C <- auto.arima(ts_electricity_C_PE)
+checkresiduals(SARIMA_entire_PE_C)
+
+SARIMA_entire_forecast2_C <- forecast(SARIMA_entire_PE_C,h=120)
+plot(SARIMA_entire_forecast2_C)
+
+
+#Fit BSM using the entire dataset for energy loss in commercial sector
+
+#Create a ts object for the entire energy loss
+ts_electricity_C_EL <- ts(
+  electricity_consumption_C[,3],
+  start=c(1973,02,01),end=c(2022,11,01),
+  frequency=12)
+
+
+#For energy loss
+BSM_entire_EL_C <- StructTS(ts_electricity_C_PE,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+checkresiduals(BSM_entire_EL_C)
+
+#Generating forecasts for the next ten years of energy losses
+BSM_entire_forecast1_C <- forecast(BSM_entire_EL_C,h=120)
+plot(BSM_entire_forecast1_C)
+
 ```
 
 ### Industrial Sector
