@@ -1,8 +1,8 @@
 ---
 title: "TSA_FinalProject_Coding"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 date: "2023-03-31"
 ---
 
@@ -10,9 +10,9 @@ date: "2023-03-31"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## install packages
 
-```{r package, message=FALSE, include=FALSE}
+```{r package, message=FALSE, warning=TRUE, include=FALSE}
+## install packages
 library(lubridate)
 library(ggplot2)
 library(forecast)  
@@ -29,7 +29,7 @@ library(forecast)
 
 ## Dataset Information
 
-```{r}
+```{r message=FALSE, warning=FALSE, results=FALSE, echo=FALSE}
 #Import the excel file
 library(readxl)
 electricity_consumption <- read_excel(path="./Table_2.1a__Energy_Consumption__Residential_-_Commercial_-_and_Industrial_Sectors.xlsx",skip = 10, sheet="Monthly Data",col_names=TRUE) 
@@ -69,10 +69,15 @@ round(electricity_consumption$`Industrial Sector Electrical System Energy Losses
 
 colnames(electricity_consumption)<-c('Date','Residential.Primary.Energy','Residential.Energy.Losses','Commercial.Primary.Energy','Commercial.Energy.Losses','Industrial.Primary.Energy','Industrial.Energy.Losses')
 
+```
+First ten rows data vs. last ten rows data
+```{r ten rows}
 head(electricity_consumption)
+tail(head(electricity_consumption))
 ```
 
-```{r}
+
+```{r message=FALSE, warning=FALSE, result=FALSE, echo=FALSE}
 #Transform to time series data
 Date_frame<-as.Date(electricity_consumption$Month)
 ts_electricity <- ts(electricity_consumption[,2:7],start=c(1973,01),end=c(2022,11),frequency=12)
@@ -129,11 +134,14 @@ summary_df <- data.frame(
   Range = c(1295.71,819.46,538.31,723.97,800.93,371.76)
 )
   
+
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() function") %>% 
   kable_styling(full_width = FALSE, position = "center",latex_options = "hold_position")
-
 summary_table
 ```
+
 
 
 ## Initial Plots
@@ -335,7 +343,7 @@ SS_scores2 <- accuracy(SS_for2$mean,last_EL_obs_R_test)
 
 ## Compare performance metrics
 
-````{r}
+```{r}
 #create data frame for primary energy consumption
 seas_scores1 <- as.data.frame(rbind(MEAN_scores1, SNAIVE_scores1, SARIMA_scores1,SSES_scores1,SS_scores1))
 row.names(seas_scores1) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
@@ -361,7 +369,7 @@ kbl_PE_R<-kbl(seas_scores1,
 kbl_PE_R
 ```
 
-````{r}
+```{r}
 #create data frame for residential energy losses
 seas_scores2 <- as.data.frame(rbind(MEAN_scores2, SNAIVE_scores2, SARIMA_scores2,SSES_scores2,SS_scores2))
 row.names(seas_scores2) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
@@ -959,7 +967,7 @@ SS_scores1_I <- accuracy(SS_for1_I$mean,last_forPE_obs_I_test)
 SS_scores2_I <- accuracy(SS_for2_I$mean,last_EL_obs_I_test)
 ```
 
-````{r}
+```{r}
 #create data frame for primary energy consumption
 seas_scores1_I <- as.data.frame(rbind(MEAN_scores1_I, SNAIVE_scores1_I, SARIMA_scores1_I,SSES_scores1_I,SS_scores1_I))
 row.names(seas_scores1_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
@@ -986,7 +994,7 @@ kbl_PE_I
 ```
 
 
-````{r}
+```{r}
 #create data frame for industrial energy losses
 seas_scores2_I <- as.data.frame(rbind(MEAN_scores2_I, SNAIVE_scores2_I, SARIMA_scores2_I,SSES_scores2_I,SS_scores2_I))
 row.names(seas_scores2_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
