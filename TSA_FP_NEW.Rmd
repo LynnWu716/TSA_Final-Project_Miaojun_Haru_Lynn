@@ -73,7 +73,7 @@ colnames(electricity_consumption)<-c('Date','Residential.Primary.Energy','Reside
 First ten rows data vs. last ten rows data
 ```{r ten rows}
 head(electricity_consumption)
-tail(head(electricity_consumption))
+tail(electricity_consumption)
 ```
 
 
