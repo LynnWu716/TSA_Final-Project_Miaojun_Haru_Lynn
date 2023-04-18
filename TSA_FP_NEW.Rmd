@@ -172,6 +172,11 @@ plot(ts_plot1)
 
 ```
 
+##Time series data transformation for all three sectors
+In all three sectors, we firstly create three sub-data frames for each sector with two variables: primary electrical consumption and energy losses. 
+
+
+
 ###Residential Sector
 ```{r message=FALSE, warning=FALSE, Include=FALSE, echo=FALSE}
 #Create a dataframe only for Residential
