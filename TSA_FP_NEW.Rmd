@@ -29,6 +29,19 @@ library(forecast)
 ```
 
 ## Dataset Information
+The Energy Information Administration (EIA) is the best source of energy data in the United States. It puts out detailed monthly and annual reports on energy production, consumption, stocks, trade, and the effects of different energy sources on the environment. The dataset on energy consumption by the three sectors of residential, commercial, and industrial, covering the period from February 1973 to November 2022, has been selected for analysis for the purposes of this study. This data set has five metrics for each sector, including total energy consumption, end-use energy consumption, energy losses in the electrical system, and primary energy consumption. In order to better understand the patterns of electricity use and energy efficiency in the three sectors, our study focuses on two variables: primary energy consumption and energy losses. Most energy sources, including coal, natural gas, petroleum, geothermal, solar, and biomass, are included in primary energy consumption.
+Overall, the following steps were applied to our dataset:
+(1) Download the dataset from EIA.
+(2) Import the dataset to R and delete the unit column.
+(3) Keep two variables for three sectors.
+(4) Convert the dataset from characters to numerical.
+(5) Round all numbers to three decimal places.
+(6) Create a date's data frame.
+(7) Convert the original dataset into time series data for forecasting and summarize it.
+(8) Calculate the mean, standard deviation, maximum values, minimum values, and ranges for primary energy consumption and electrical losses in three sectors.
+(9) Make a summary statistics table.
+(10) Utilize ggplot() to compare three sectors using two initial plots that are variable-classified.
+
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
 #Import the excel file
@@ -135,18 +148,20 @@ summary_df <- data.frame(
   
 
 ```
-
+The following table and figures are visualized here:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-summary_table<-kbl(summary_df, caption="Summary Statistics Table used with ts() function") %>% 
+summary_table<-kbl(summary_df, caption="Table 1. Summary Statistics Table used with ts() function") %>% 
   kable_styling(full_width = FALSE, position = "center",latex_options = "hold_position")
 summary_table
 ```
 
+The industrial sector has the highest average consumption (1806.54 trillion BTU) when comparing primary electrical consumption across the three sectors (Table 1). Despite the similar average energy losses across all three sectors, the residential sector nevertheless suffers from the highest energy losses as a result of overcoming transmission line resistance.
+The residential sector has the highest primary electricity consumption, whereas the industrial sector has the lowest energy losses, according to a comparison of standard deviations that we also conducted.
+The ranges show the fundamental seasonal shifts over the last few decades. For primary electricity consumption, the residential sector has the strongest seasonality, while the industrial sector exhibits the least seasonality.
 
-
-## Initial Plots
 
 ```{r, echo=FALSE}
+## Initial Plots
 #plot for electricity consumption
 cols<-c("residential"="orange","commercial"="steelblue","industrial"="yellow")
 ts_plot<-ggplot(electricity_consumption)+
@@ -155,7 +170,7 @@ ts_plot<-ggplot(electricity_consumption)+
   xlab("Date")+
   geom_line(aes(x=Date,y=Commercial.Primary.Energy,color="commercial"))+
   geom_line(aes(x=Date,y=Industrial.Primary.Energy,color="industrial"))+
-  labs(title="Primary Electricity Consumption of Three Sectors")+
+  labs(title="Figure 1. Primary Electricity Consumption of Three Sectors")+
   scale_color_manual(name="series",values = cols)
 plot(ts_plot)
           
@@ -167,19 +182,19 @@ ts_plot1<-ggplot(electricity_consumption)+
   xlab("Date")+
   geom_line(aes(x=Date,y=Commercial.Energy.Losses,color="commercial"))+
   geom_line(aes(x=Date,y=Industrial.Energy.Losses,color="industrial"))+
-  labs(title="Energy Losses of Three Sectors")+
+  labs(title="Figure 2. Energy Losses of Three Sectors")+
   scale_color_manual(name="series",values = cols1)
 plot(ts_plot1)
 
 ```
+The highest primary energy consumption in Figure 1 is in the industrial sector. Although there is the most seasonality in the residential sector, the commercial sector uses the least primary energy. Strong seasonality is typically more pronounced in the residential and industrial sectors in the summer and winter but less pronounced in the spring and fall. In general, residential and commercial sector patterns are nearly stable; however, exogenous influences throughout time cause the industrial sector to experience increasing and declining trends.
+In contrast to the commercial and residential sectors in Figure 2, the electrical losses in the industrial sectors are decreasing. In three sectors, electricity losses are highest in the residential sector while being lowest in the industrial sector. Three industries saw an increasing tendency in energy losses prior to 2000, but after that year, they saw decreasing trends.
 
-##Time series data transformation for all three sectors
-In all three sectors, we firstly create three sub-data frames for each sector with two variables: primary electrical consumption and energy losses. 
+We initially build three sub-data frames containing the two variables primary electricity consumption and energy losses for each of the three sectors. All data were converted to time series data. To compute five one seasonality models, forecast consumption and losses from 2017 to 2022, and determine the most effective forecasting models for the next 10 years, all three sectors also contain one testing dataset and one training dataset between 1973 and 2017.
 
 
-
-###Residential Sector
 ```{r message=FALSE, warning=FALSE, Include=FALSE, echo=FALSE}
+###Residential Sector
 #Create a dataframe only for Residential
 electricity_consumption_R<-electricity_consumption[,-4:-7]
 colnames(electricity_consumption_R)<-c('Date','Primary.Energy','Energy.Losses')
@@ -287,7 +302,7 @@ ts_electricity_I_EL_test <- ts(
 
 ```
 
-##ACF and PACF Plots
+Before running a time series forecast model and selecting models for time series forecasting, we examine ACF and PACF plots of the original, un-transformed time series (shown below).
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
 par(mfrow=c(1,6))
@@ -299,7 +314,7 @@ par(mfrow=c(1,6))
   PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
 
 ```
-
+For our first variable--primary energy consumption, both ACF and PACF not only show strong seasonality but also non-stationary due to slow decays.
 ```{r echo=FALSE}
 #ACF and PACF plots for energy losses
 
@@ -311,6 +326,7 @@ par(mfrow=c(1,6))
   ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
   PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
 ```
+For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
 
 ## Model 1: Arithmetic mean
 ```{r include=FALSE}
