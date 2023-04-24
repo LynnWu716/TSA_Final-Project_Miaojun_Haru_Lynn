@@ -11,6 +11,7 @@ date: "2023-03-31"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+##Introduction and Objectives
 Energy consumption is a critical indicator for policymakers, industry stakeholders, and researchers to develop effective energy policies and solutions for an effective use of electricity and power loss reduction. However, accurately forecasting and analyzing energy consumption data can be challenging to obtain, as most data are preliminary and subject to revision.
 
 In this project, we will use time series analysis in R to forecast and analyze energy consumption data for three sectors: residential, commercial, and industrial, in the United States, from February 1973 to November 2022. Motivated by the importance of accurate and reliable energy consumption data, this project aims to contribute to a better understanding of energy trends and help inform policy and decision-making in the energy sector. By forecasting and analyzing the EIA’s data on residential, commercial, and industrial uses, we hope to shed light on the drivers of energy consumption in these sectors and identify potential opportunities for reducing energy consumption and improving energy efficiency. 
@@ -223,13 +224,13 @@ ts_electricity_R <- ts(
 
 ts_electricity_R_PE_test <- ts(
   electricity_consumption_R[,2],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 
 ts_electricity_R_EL_test <- ts(
   electricity_consumption_R[,3],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -237,10 +238,10 @@ ts_electricity_R_EL_test <- ts(
 ```{r message=FALSE, warning=FALSE, Include=FALSE, echo=FALSE}
 # Create a variable with number of steps ahead we will forecast
 #Three years as test variable
-n_for <- 36
+n_for <- 60
 
 ts_forPE_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
-                start=c(1973,02,01),end=c(2019,11,01),
+                start=c(1973,02,01),end=c(2017,11,01),
                frequency=12)
 
 last_forPE_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"]
@@ -248,7 +249,7 @@ last_forPE_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"]
 ts_last_forPE_obs_R_test <- ts(last_forPE_obs_R_test)
 
 ts_forEL_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,02,01),end=c(2019,11,01),
+               start=c(1973,02,01),end=c(2017,11,01),
                frequency=12)
 last_EL_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"]
 
@@ -274,13 +275,13 @@ ts_electricity_C <- ts(
 
 ts_electricity_C_PE_test <- ts(
   electricity_consumption_C[,2],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 
 ts_electricity_C_EL_test <- ts(
   electricity_consumption_C[,3],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -303,12 +304,12 @@ ts_electricity_I <- ts(
 
 ts_electricity_I_PE_test <- ts(
   electricity_consumption_I[,2],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 ts_electricity_I_EL_test <- ts(
   electricity_consumption_I[,3],
-  start=c(2019,11,01),end=c(2022,11,01),
+  start=c(2017,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
