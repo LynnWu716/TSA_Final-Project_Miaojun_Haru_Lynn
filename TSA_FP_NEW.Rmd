@@ -11,6 +11,17 @@ date: "2023-03-31"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Energy consumption is a critical indicator for policymakers, industry stakeholders, and researchers to develop effective energy policies and solutions for an effective use of electricity and power loss reduction. However, accurately forecasting and analyzing energy consumption data can be challenging to obtain, as most data are preliminary and subject to revision.
+
+In this project, we will use time series analysis in R to forecast and analyze energy consumption data for three sectors: residential, commercial, and industrial, in the United States, from February 1973 to November 2022. Motivated by the importance of accurate and reliable energy consumption data, this project aims to contribute to a better understanding of energy trends and help inform policy and decision-making in the energy sector. By forecasting and analyzing the EIA’s data on residential, commercial, and industrial uses, we hope to shed light on the drivers of energy consumption in these sectors and identify potential opportunities for reducing energy consumption and improving energy efficiency. 
+
+Moreover, in the time range of February 1973 to November 2022, the United States has experienced a number of political and natural disturbances, such as recessions, pandemics, and natural disasters. Those external factors frequently have an impact on electricity consumption. Then this project aims to explore the impacts of external disturbances on energy consumption in each sector. Forecasting the energy consumption could help ensure the reliability of the energy needs in each sector amid the turmoil and further seek the potential use of emerging technologies such as energy storage in the respective sector. 
+
+Objectives
+The objective of this study is to analyze: 
+  (1) Effective use of electricity in the residential, commercial, and industrial sectors while considering the energy loss data
+  (2) How energy consumption gets affected by natural and political disturbances in each sector 
+  (3) Potential in the use of energy technologies, such as electricity storage, by the sectors
 
 ```{r package, message=FALSE, warning=FALSE, include=FALSE}
 ## install packages
@@ -31,16 +42,16 @@ library(forecast)
 ## Dataset Information
 The Energy Information Administration (EIA) is the best source of energy data in the United States. It puts out detailed monthly and annual reports on energy production, consumption, stocks, trade, and the effects of different energy sources on the environment. The dataset on energy consumption by the three sectors of residential, commercial, and industrial, covering the period from February 1973 to November 2022, has been selected for analysis for the purposes of this study. This data set has five metrics for each sector, including total energy consumption, end-use energy consumption, energy losses in the electrical system, and primary energy consumption. In order to better understand the patterns of electricity use and energy efficiency in the three sectors, our study focuses on two variables: primary energy consumption and energy losses. Most energy sources, including coal, natural gas, petroleum, geothermal, solar, and biomass, are included in primary energy consumption.
 Overall, the following steps were applied to our dataset:
-(1) Download the dataset from EIA.
-(2) Import the dataset to R and delete the unit column.
-(3) Keep two variables for three sectors.
-(4) Convert the dataset from characters to numerical.
-(5) Round all numbers to three decimal places.
-(6) Create a date's data frame.
-(7) Convert the original dataset into time series data for forecasting and summarize it.
-(8) Calculate the mean, standard deviation, maximum values, minimum values, and ranges for primary energy consumption and electrical losses in three sectors.
-(9) Make a summary statistics table.
-(10) Utilize ggplot() to compare three sectors using two initial plots that are variable-classified.
+  (1) Download the dataset from EIA.
+  (2) Import the dataset to R and delete the unit column.
+  (3) Keep two variables for three sectors.
+  (4) Convert the dataset from characters to numerical.
+  (5) Round all numbers to three decimal places.
+  (6) Create a date's data frame.
+  (7) Convert the original dataset into time series data for forecasting and summarize it.
+  (8) Calculate the mean, standard deviation, maximum values, minimum values, and ranges for primary energy consumption and electrical losses in three sectors.
+  (9) Make a summary statistics table.
+  (10) Utilize ggplot() to compare three sectors using two initial plots that are variable-classified.
 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, echo=FALSE}
@@ -212,13 +223,13 @@ ts_electricity_R <- ts(
 
 ts_electricity_R_PE_test <- ts(
   electricity_consumption_R[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 
 ts_electricity_R_EL_test <- ts(
   electricity_consumption_R[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -226,10 +237,10 @@ ts_electricity_R_EL_test <- ts(
 ```{r message=FALSE, warning=FALSE, Include=FALSE, echo=FALSE}
 # Create a variable with number of steps ahead we will forecast
 #Three years as test variable
-n_for <- 60
+n_for <- 36
 
 ts_forPE_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
-                start=c(1973,02,01),end=c(2017,11,01),
+                start=c(1973,02,01),end=c(2019,11,01),
                frequency=12)
 
 last_forPE_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"]
@@ -237,7 +248,7 @@ last_forPE_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"]
 ts_last_forPE_obs_R_test <- ts(last_forPE_obs_R_test)
 
 ts_forEL_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,02,01),end=c(2017,11,01),
+               start=c(1973,02,01),end=c(2019,11,01),
                frequency=12)
 last_EL_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"]
 
@@ -263,13 +274,13 @@ ts_electricity_C <- ts(
 
 ts_electricity_C_PE_test <- ts(
   electricity_consumption_C[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 
 ts_electricity_C_EL_test <- ts(
   electricity_consumption_C[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -292,12 +303,12 @@ ts_electricity_I <- ts(
 
 ts_electricity_I_PE_test <- ts(
   electricity_consumption_I[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 ts_electricity_I_EL_test <- ts(
   electricity_consumption_I[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2019,11,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -306,12 +317,12 @@ Before running a time series forecast model and selecting models for time series
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
 par(mfrow=c(1,6))
-  ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF")
-  PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF")
-  ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF")
-  PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF")
-  ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF")
-  PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
+ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF")
+PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF")
+ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF")
+PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF")
+ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF")
+PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
 
 ```
 For our first variable--primary energy consumption, both ACF and PACF not only show strong seasonality but also non-stationary due to slow decays.
@@ -319,17 +330,20 @@ For our first variable--primary energy consumption, both ACF and PACF not only s
 #ACF and PACF plots for energy losses
 
 par(mfrow=c(1,6))
-  ACF_Plot1 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF")
-  PACF_Plot1 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF")
-  ACF_Plot2 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF")
-  PACF_Plot2 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF")
-  ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
-  PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
+ACF_Plot1 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF")
+PACF_Plot1 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF")
+ACF_Plot2 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF")
+PACF_Plot2 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF")
+ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
+PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
 ```
 For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
 
-## Model 1: Arithmetic mean
+## Analysis (Methods and Models)
+
+
 ```{r include=FALSE}
+## Model 1: Arithmetic mean
 #mean model for primary energy consumption
 MEAN_seas1 <- meanf(y = ts_forPE_R_train, h = n_for)  
 checkresiduals(MEAN_seas1)
@@ -350,8 +364,8 @@ plot(MEAN_seas2)
 ```
 
 
-## Model 2: Seasonal naive
 ```{r include=FALSE}
+## Model 2: Seasonal naive
 #seasonal naive model for primary energy consumption
 SNAIVE_seas1 <- snaive(ts_forPE_R_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas1)
@@ -372,8 +386,8 @@ plot(SNAIVE_seas2)
 ```
 
 
-## Model 3: SARIMA
 ```{r include=FALSE}
+## Model 3: SARIMA
 ##SARIMA model for primary energy consumption
 SARIMA_autofit1 <- auto.arima(ts_forPE_R_train)
 checkresiduals(SARIMA_autofit1)
@@ -398,10 +412,9 @@ plot(SARIMA_for2)
 ```
 
 
+```{r include=FALSE}
 ## Fitting State Space Models to the original (seasonal) series
 ## Model 4: SS Exponential smoothing
-
-```{r include=FALSE}
 ##SSEAS model for primary energy consumption
 SSES_seas1 <- es(ts_forPE_R_train,model="ZZZ",h=n_for,holdout=FALSE)
 plot(SSES_seas1)
@@ -430,10 +443,8 @@ autoplot(ts_forEL_R_train) +
 
 
 
-### Model 5: SS with StructTS()
-
-
 ```{r include=FALSE}
+### Model 5: SS with StructTS()
 #For primary energy consumption
 SS_seas1 <- StructTS(ts_forPE_R_train,
                     type="BSM",fixed=c(NA,NA,NA,NA))
@@ -461,10 +472,8 @@ plot(SS_for2)
 ```
 
 
-
-## Checking accuracy of the five models
-
 ```{r include=FALSE}
+## Checking accuracy of the five models
 #Model 1: Arithmetic mean
 MEAN_scores1 <- accuracy(MEAN_seas1$mean,last_forPE_obs_R_test)
 MEAN_scores2 <- accuracy(MEAN_seas2$mean,last_EL_obs_R_test)
@@ -486,9 +495,9 @@ SS_scores1 <- accuracy(SS_for1$mean,last_forPE_obs_R_test)
 SS_scores2 <- accuracy(SS_for2$mean,last_EL_obs_R_test)
 ```
 
-## Compare performance metrics
 
 ```{r include=FALSE}
+## Compare performance metrics
 #create data frame for primary energy consumption
 seas_scores1 <- as.data.frame(rbind(MEAN_scores1, SNAIVE_scores1, SARIMA_scores1,SSES_scores1,SS_scores1))
 row.names(seas_scores1) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
@@ -532,9 +541,9 @@ kbl_EL_R<-kbl(seas_scores2,
 kbl_EL_R
 ```
 
-## Plotting everything together
 
 ```{r echo=FALSE}
+## Plotting everything together
 #Residential Primary Energy
 autoplot(ts_electricity_R[,"Primary.Energy"]) +
   autolayer(MEAN_seas1, PI=FALSE, series="Mean") +
@@ -579,8 +588,8 @@ autoplot(ts_electricity_R_EL_test) +
 
 ```
 
-### Now Fit Best Model for Residential Sector
 ```{r include=FALSE}
+### Now Fit Best Model for Residential Sector
 #Now fit SSES (the best model) using the entire data set for PE consumption in residential sector
 
 #transform to time series data FOR Primary Energy Consumption
