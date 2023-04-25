@@ -14,14 +14,17 @@ knitr::opts_chunk$set(echo = TRUE)
 ##Introduction and Objectives
 Energy consumption is a critical indicator for policymakers, industry stakeholders, and researchers to develop effective energy policies and solutions for an effective use of electricity and power loss reduction. However, accurately forecasting and analyzing energy consumption data can be challenging to obtain, as most data are preliminary and subject to revision.
 
-In this project, we will use time series analysis in R to forecast and analyze energy consumption data for three sectors: residential, commercial, and industrial, in the United States, from February 1973 to November 2022. Motivated by the importance of accurate and reliable energy consumption data, this project aims to contribute to a better understanding of energy trends and help inform policy and decision-making in the energy sector. By forecasting and analyzing the EIA’s data on residential, commercial, and industrial uses, we hope to shed light on the drivers of energy consumption in these sectors and identify potential opportunities for reducing energy consumption and improving energy efficiency. 
+In this project, we will use time series analysis in R to forecast and analyze energy consumption data for three sectors: residential, commercial, and industrial, in the United States, from February 1973 to November 2022. Motivated by the importance of accurate and reliable energy consumption data, this project aims to contribute to a better understanding of energy trends and help inform policy and decision-making in the energy sector. By forecasting and analyzing the U.S. Energy Information Administration’s data on residential, commercial, and industrial uses, we hope to shed light on the drivers of energy consumption in these sectors and identify potential opportunities for reducing energy consumption and improving energy efficiency. 
 
 Moreover, in the time range of February 1973 to November 2022, the United States has experienced a number of political and natural disturbances, such as recessions, pandemics, and natural disasters. Those external factors frequently have an impact on electricity consumption. Then this project aims to explore the impacts of external disturbances on energy consumption in each sector. Forecasting the energy consumption could help ensure the reliability of the energy needs in each sector amid the turmoil and further seek the potential use of emerging technologies such as energy storage in the respective sector. 
 
 Objectives
 The objective of this study is to analyze: 
+
   (1) Effective use of electricity in the residential, commercial, and industrial sectors while considering the energy loss data
+  
   (2) How energy consumption gets affected by natural and political disturbances in each sector 
+  
   (3) Potential in the use of energy technologies, such as electricity storage, by the sectors
 
 ```{r package, message=FALSE, warning=FALSE, include=FALSE}
@@ -43,15 +46,25 @@ library(forecast)
 ## Dataset Information
 The Energy Information Administration (EIA) is the best source of energy data in the United States. It puts out detailed monthly and annual reports on energy production, consumption, stocks, trade, and the effects of different energy sources on the environment. The dataset on energy consumption by the three sectors of residential, commercial, and industrial, covering the period from February 1973 to November 2022, has been selected for analysis for the purposes of this study. This data set has five metrics for each sector, including total energy consumption, end-use energy consumption, energy losses in the electrical system, and primary energy consumption. In order to better understand the patterns of electricity use and energy efficiency in the three sectors, our study focuses on two variables: primary energy consumption and energy losses. Most energy sources, including coal, natural gas, petroleum, geothermal, solar, and biomass, are included in primary energy consumption.
 Overall, the following steps were applied to our dataset:
+
   (1) Download the dataset from EIA.
+  
   (2) Import the dataset to R and delete the unit column.
+  
   (3) Keep two variables for three sectors.
+  
   (4) Convert the dataset from characters to numerical.
+  
   (5) Round all numbers to three decimal places.
+  
   (6) Create a date's data frame.
+  
   (7) Convert the original dataset into time series data for forecasting and summarize it.
+  
   (8) Calculate the mean, standard deviation, maximum values, minimum values, and ranges for primary energy consumption and electrical losses in three sectors.
+  
   (9) Make a summary statistics table.
+  
   (10) Utilize ggplot() to compare three sectors using two initial plots that are variable-classified.
 
 
@@ -160,7 +173,9 @@ summary_df <- data.frame(
   
 
 ```
+
 The following table and figures are visualized here:
+
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 summary_table<-kbl(summary_df, caption="Table 1. Summary Statistics Table used with ts() function") %>% 
   kable_styling(full_width = FALSE, position = "center",latex_options = "hold_position")
@@ -199,11 +214,11 @@ ts_plot1<-ggplot(electricity_consumption)+
 plot(ts_plot1)
 
 ```
+
 The highest primary energy consumption in Figure 1 is in the industrial sector. Although there is the most seasonality in the residential sector, the commercial sector uses the least primary energy. Strong seasonality is typically more pronounced in the residential and industrial sectors in the summer and winter but less pronounced in the spring and fall. In general, residential and commercial sector patterns are nearly stable; however, exogenous influences throughout time cause the industrial sector to experience increasing and declining trends.
 In contrast to the commercial and residential sectors in Figure 2, the electrical losses in the industrial sectors are decreasing. In three sectors, electricity losses are highest in the residential sector while being lowest in the industrial sector. Three industries saw an increasing tendency in energy losses prior to 2000, but after that year, they saw decreasing trends.
 
 We initially build three sub-data frames containing the two variables primary electricity consumption and energy losses for each of the three sectors. All data were converted to time series data. To compute five one seasonality models, forecast consumption and losses from 2017 to 2022, and determine the most effective forecasting models for the next 10 years, all three sectors also contain one testing dataset and one training dataset between 1973 and 2017.
-
 
 ```{r message=FALSE, warning=FALSE, Include=FALSE, echo=FALSE}
 ###Residential Sector
@@ -224,13 +239,12 @@ ts_electricity_R <- ts(
 
 ts_electricity_R_PE_test <- ts(
   electricity_consumption_R[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
-
 
 ts_electricity_R_EL_test <- ts(
   electricity_consumption_R[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -241,15 +255,14 @@ ts_electricity_R_EL_test <- ts(
 n_for <- 60
 
 ts_forPE_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Primary.Energy"],
-                start=c(1973,02,01),end=c(2017,11,01),
+                start=c(1973,02,01),
                frequency=12)
 
 last_forPE_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Primary.Energy"]
 
-ts_last_forPE_obs_R_test <- ts(last_forPE_obs_R_test)
 
 ts_forEL_R_train <- ts(ts_electricity_R[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,02,01),end=c(2017,11,01),
+               start=c(1973,02,01),
                frequency=12)
 last_EL_obs_R_test <- ts_electricity_R[(nobs-n_for+1):nobs,"Energy.Losses"]
 
@@ -275,13 +288,13 @@ ts_electricity_C <- ts(
 
 ts_electricity_C_PE_test <- ts(
   electricity_consumption_C[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
 
 
 ts_electricity_C_EL_test <- ts(
   electricity_consumption_C[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -304,12 +317,12 @@ ts_electricity_I <- ts(
 
 ts_electricity_I_PE_test <- ts(
   electricity_consumption_I[,2],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
 
 ts_electricity_I_EL_test <- ts(
   electricity_consumption_I[,3],
-  start=c(2017,11,01),end=c(2022,11,01),
+  start=c(2017,12,01),end=c(2022,11,01),
   frequency=12)
 
 ```
@@ -318,11 +331,15 @@ Before running a time series forecast model and selecting models for time series
 
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
-par(mfrow=c(1,6))
+par(mfrow=c(1,2))
 ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF")
 PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF")
+
+par(mfrow=c(1,2))
 ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF")
 PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF")
+
+par(mfrow=c(1,2))
 ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF")
 PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
 
@@ -333,16 +350,21 @@ For our first variable--primary energy consumption, both ACF and PACF not only s
 ```{r echo=FALSE}
 #ACF and PACF plots for energy losses
 
-par(mfrow=c(1,6))
+par(mfrow=c(1,2))
 ACF_Plot1 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF")
 PACF_Plot1 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF")
+
+par(mfrow=c(1,2))
 ACF_Plot2 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF")
 PACF_Plot2 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF")
+
+par(mfrow=c(1,2))
 ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
 PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
 ```
 
 For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
+
 
 ## Analysis (Methods and Models)
 
@@ -425,7 +447,7 @@ SSES_seas1 <- es(ts_forPE_R_train,model="ZZZ",h=n_for,holdout=FALSE)
 plot(SSES_seas1)
 checkresiduals(SSES_seas1)
 
-##SSEAS model for energy losses
+##SSES model for energy losses
 SSES_seas2 <- es(ts_forEL_R_train,model="XXX",h=n_for,holdout=FALSE)
 plot(SSES_seas2)
 checkresiduals(SSES_seas2)
@@ -513,6 +535,8 @@ cat("The best model by RMSE is:", row.names(seas_scores1[best_model_index1_RMSE,
                             
 ```
 
+
+
 ```{r echo=FALSE}
 
 kbl_PE_R<-kbl(seas_scores1, 
@@ -535,6 +559,7 @@ cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2_RMSE,
                             
 ```
 
+
 ```{r echo=FALSE}
 
 kbl_EL_R<-kbl(seas_scores2, 
@@ -546,6 +571,7 @@ kbl_EL_R<-kbl(seas_scores2,
 kbl_EL_R
 ```
 
+#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 ## Plotting everything together
@@ -569,6 +595,7 @@ autoplot(ts_electricity_R_PE_test) +
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
 ```
+#Energy Loss Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 #Residential Energy Losses
@@ -595,7 +622,6 @@ autoplot(ts_electricity_R_EL_test) +
 
 ```{r include=FALSE}
 ### Now Fit Best Model for Residential Sector
-#Now fit SSES (the best model) using the entire data set for PE consumption in residential sector
 
 #transform to time series data FOR Primary Energy Consumption
 ts_electricity_R_entire_Consumption <- ts(
@@ -609,44 +635,50 @@ ts_electricity_R_entire_Losses <- ts(
   start=c(1973,02,01),end=c(2022,11,01),
   frequency=12)
 
-#SSES forecast for both variables in residential sector
-##SSEAS model for primary energy consumption for future ten years
+#10 year foreacast
 n_for2<-120
-SARIMA_autofit1for <- auto.arima(ts_electricity_R_entire_Consumption)
-checkresiduals(SARIMA_autofit1for)
 
-SARIMA_for3 <- forecast(SARIMA_autofit1for,h=n_for)
-plot(SARIMA_for3)
+### Best Model for residential electricity consumption: BSM
+BSM_R_PE_entire <- StructTS(ts_electricity_R_entire_Consumption,
+                    type="BSM",fixed=c(NA,NA,NA,NA))
+BSM_R_PEfor_entire <- forecast(BSM_R_PE_entire,h=n_for2)
+plot(BSM_R_PEfor_entire)
+
 
 ##SSEAS model for energy losses for future ten years
-SSES_seas4 <- es(ts_electricity_R_entire_Losses,model="XXX",h=n_for2,holdout=FALSE)
-checkresiduals(SSES_seas4)
+SSES_R_EL_entire <- es(ts_electricity_R_entire_Losses,model="XXX",h=n_for2,holdout=FALSE)
+plot(SSES_R_EL_entire)
 
 
 ```
 
-```{r echo=FALSE}
-#10years
-plot(SARIMA_for3)
-```
+#Ten years' Forecast
 
 ```{r echo=FALSE}
 #10yrs
+
+autoplot(ts_electricity_R_entire_Consumption) +
+  autolayer(BSM_R_PEfor_entire, series="BSM") +
+  xlab("Month") + ylab("Energy Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
+
+
 autoplot(ts_electricity_R_entire_Losses) +
-  autolayer(SSES_seas4$forecast, series="SSES") +
+  autolayer(SSES_R_EL_entire$forecast, series="SSES") +
   xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2022-2032"))
+
 ```
 
 
-###Commercial Sector
+##Commercial Sector
 
 ```{r include=FALSE}
 # Create a variable with number of steps ahead we will forecast
 n_for <- 60
 
 ts_forPE_C_train <- ts(ts_electricity_C[1:(nobs-n_for),"Primary.Energy"],
-               start=c(1973,02,01),end=c(2017,11,01),
+               start=c(1973,02,01),
                frequency=12)
 last_PE_obs_C_test <- ts_electricity_C[(nobs-n_for+1):nobs,"Primary.Energy"] 
 
@@ -657,9 +689,8 @@ last_EL_obs_C_test <- ts_electricity_C[(nobs-n_for+1):nobs,"Energy.Losses"]
 ```
 
 
-
-## Model 1: Arithmetic mean
 ```{r include=FALSE}
+##Model 1: Arithmetic mean
 #mean model for primary energy consumption
 MEAN_seas1_C <- meanf(y = ts_forPE_C_train, h = n_for)  
 checkresiduals(MEAN_seas1_C)
@@ -678,8 +709,8 @@ plot(MEAN_seas1_C)
 plot(MEAN_seas2_C)
 ```
 
-## Model 2: Seasonal naive
 ```{r include=FALSE}
+## Model 2: Seasonal naive
 #seasonal naive model for primary energy consumption
 SNAIVE_seas1_C <- snaive(ts_forPE_C_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas1_C)
@@ -698,8 +729,8 @@ plot(SNAIVE_seas2_C)
 ```
 
 
-## Model 3: SARIMA
 ```{r include=FALSE}
+## Model 3: SARIMA
 ##SARIMA model for primary energy consumption
 SARIMA_autofit1_C <- auto.arima(ts_forPE_C_train)
 checkresiduals(SARIMA_autofit1_C)
@@ -723,10 +754,10 @@ plot(SARIMA_for2_C)
 ```
 
 
+```{r include=FALSE}
+
 ## Fitting State Space Models to the original (seasonal) series
 ## Model 4: SS Exponential smoothing
-
-```{r include=FALSE}
 ##SSEAS model for primary energy consumption
 SSES_seas1_C <- es(ts_forPE_C_train,model="ZZZ",h=n_for,holdout=FALSE)
 checkresiduals(SSES_seas1_C)
@@ -753,10 +784,9 @@ autoplot(ts_forEL_C_train) +
 
 
 
-### Model 5: SS with StructTS()
-
 
 ```{r include=FALSE}
+### Model 5: SS with StructTS()
 #For primary energy consumption
 SS_seas1_C <- StructTS(ts_forPE_C_train,
                     type="BSM",fixed=c(NA,NA,NA,NA))
@@ -782,9 +812,8 @@ plot(SS_for2_C)
 ```
 
 
-## Checking accuracy of the five models
-
 ```{r include=FALSE}
+## Checking accuracy of the five models
 #Model 1: Arithmetic mean
 MEAN_scores1_C <- accuracy(MEAN_seas1_C$mean,last_PE_obs_C_test)
 MEAN_scores2_C <- accuracy(MEAN_seas2_C$mean,last_EL_obs_C_test)
@@ -818,6 +847,7 @@ cat("The best model by RMSE is:", row.names(seas_scores1_C[best_model_index1_C_R
                             
 ```
 
+
 ```{r echo=FALSE}
 kbl_PE_C<-kbl(seas_scores1_C, 
       caption = "Forecast Accuracy for Commercial Primary Energy Consumption's Seasonal Data",
@@ -835,6 +865,7 @@ cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C_R
 
 ```
 
+
 ```{r echo=FALSE}
 kbl_EL_C<-kbl(seas_scores2_C, 
       caption = "Forecast Accuracy for Commercial Energy Losses' Seasonal Data",
@@ -843,6 +874,8 @@ kbl_EL_C<-kbl(seas_scores2_C,
   kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_C[,"RMSE"]))
 kbl_EL_C
 ```
+
+#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 ## Plotting everything together
@@ -866,6 +899,8 @@ autoplot(ts_electricity_C_PE_test) +
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
 ```
+
+#Energy Loss Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 #Commercial Energy Losses
@@ -905,8 +940,6 @@ checkresiduals(SARIMA_entire_PE_C)
 SARIMA_entire_forecast2_C <- forecast(SARIMA_entire_PE_C,h=120)
 
 
-#Fit SSES using the entire dataset for energy loss in commercial sector
-
 #Create a ts object for the entire energy loss
 ts_electricity_C_EL <- ts(
   electricity_consumption_C[,3],
@@ -923,15 +956,22 @@ SARIMA_entire_forecast3_C <- forecast(SARIMA_entire_EL_C,h=120)
 
 ```
 
+#Ten years' Forecast
 
 ```{r echo=FALSE}
 #10yrs
-plot(SARIMA_entire_forecast2_C)
+autoplot(ts_electricity_C_PE) +
+  autolayer(SARIMA_entire_forecast2_C, series="SARIMA") +
+  xlab("Month") + ylab("Energy Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
 ```{r echo=FALSE}
 #10yrs
-plot(SARIMA_entire_forecast3_C)
+autoplot(ts_electricity_C_EL) +
+  autolayer(SARIMA_entire_forecast3_C, series="SARIMA") +
+  xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
 
@@ -942,19 +982,19 @@ plot(SARIMA_entire_forecast3_C)
 n_for <- 60
 
 ts_forPE_I_train <- ts(ts_electricity_I[1:(nobs-n_for),"Primary.Energy"],
-                start=c(1973,02,01),end=c(2017,11,01),
+                start=c(1973,02,01),
                frequency=12)
 
 last_forPE_obs_I_test <- ts_electricity_I[(nobs-n_for+1):nobs,"Primary.Energy"]
 
 ts_forEL_I_train <- ts(ts_electricity_I[1:(nobs-n_for),"Energy.Losses"],
-               start=c(1973,02,01),end=c(2017,11,01),
+               start=c(1973,02,01),
                frequency=12)
 last_EL_obs_I_test <- ts_electricity_I[(nobs-n_for+1):nobs,"Energy.Losses"]
 ```
 
-## Model 1: Arithmetic mean
 ```{r include=FALSE}
+## Model 1: Arithmetic mean
 #mean model for primary energy consumption
 MEAN_seas1_I <- meanf(y = ts_forPE_I_train, h =n_for)  
 checkresiduals(MEAN_seas1_I)
@@ -974,8 +1014,9 @@ plot(MEAN_seas1_I)
 plot(MEAN_seas2_I)
 ```
 
-## Model 2: Seasonal naive
+
 ```{r include=FALSE}
+## Model 2: Seasonal naive
 #seasonal naive model for primary energy consumption
 SNAIVE_seas1_I <- snaive(ts_forPE_I_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas1_I)
@@ -994,9 +1035,8 @@ plot(SNAIVE_seas2_I)
 ```
 
 
-
-## Model 3: SARIMA
 ```{r include=FALSE}
+## Model 3: SARIMA
 ##SARIMA model for primary energy consumption
 SARIMA_autofit1_I <- auto.arima(ts_forPE_I_train)
 checkresiduals(SARIMA_autofit1_I)
@@ -1019,10 +1059,10 @@ plot(SARIMA_for1_I)
 plot(SARIMA_for2_I)
 ```
 
-## Fitting State Space Models to the original (seasonal) series
-## Model 4: SS Exponential smoothing
 
 ```{r include=FALSE}
+## Fitting State Space Models to the original (seasonal) series
+## Model 4: SS Exponential smoothing
 ##SSEAS model for primary energy consumption
 SSES_seas1_I <- es(ts_forPE_I_train,model="ZZZ",h=n_for,holdout=FALSE)
 plot(SSES_seas1_I)
@@ -1049,10 +1089,9 @@ autoplot(ts_forEL_I_train) +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 ```
 
-### Model 5: SS with StructTS()
-
 
 ```{r include=FALSE}
+### Model 5: SS with StructTS()
 #For primary energy consumption
 SS_seas1_I <- StructTS(ts_forPE_I_train,
                     type="BSM",fixed=c(NA,NA,NA,NA))
@@ -1078,9 +1117,9 @@ plot(SS_for1_I)
 plot(SS_for2_I)
 ```
 
-## Checking accuracy of the five models
 
 ```{r include=FALSE}
+## Checking accuracy of the five models
 #Model 1: Arithmetic mean
 MEAN_scores1_I <- accuracy(MEAN_seas1_I$mean,last_forPE_obs_I_test)
 MEAN_scores2_I <- accuracy(MEAN_seas2_I$mean,last_EL_obs_I_test)
@@ -1108,11 +1147,12 @@ seas_scores1_I <- as.data.frame(rbind(MEAN_scores1_I, SNAIVE_scores1_I, SARIMA_s
 row.names(seas_scores1_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 
 #choose model with lowest RMSE
-best_model_index1_I_RMSE <- which.min(seas_scores1_I[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores1_I[best_model_index1_I_RMSE,]))        
+best_model_index1_I_MAPE <- which.min(seas_scores1_I[,"MAPE"])
+cat("The best model by MAPE is:", row.names(seas_scores1_I[best_model_index1_I_MAPE,]))        
   
                             
 ```
+
 
 ```{r echo=FALSE}
 
@@ -1120,7 +1160,7 @@ kbl_PE_I<-kbl(seas_scores1_I,
       caption = "Forecast Accuracy for Industrial Primary Energy Consumption's Seasonal Data",
       digits = array(5,ncol(seas_scores1_I))) %>%
   kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_I[,"RMSE"]))
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_I[,"MAPE"]))
 
 kbl_PE_I
 ```
@@ -1132,10 +1172,11 @@ seas_scores2_I <- as.data.frame(rbind(MEAN_scores2_I, SNAIVE_scores2_I, SARIMA_s
 row.names(seas_scores2_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 
 #choose model with lowest RMSE
-best_model_index2_I_RMSE <- which.min(seas_scores2_I[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores2_I[best_model_index2_I_RMSE,]))      
+best_model_index2_I_MAPE <- which.min(seas_scores2_I[,"MAPE"])
+cat("The best model by MAPE is:", row.names(seas_scores2_I[best_model_index2_I_MAPE,]))      
                             
 ```
+
 
 ```{r echo=FALSE}
 
@@ -1143,14 +1184,15 @@ kbl_EL_I<-kbl(seas_scores2_I,
       caption = "Forecast Accuracy for Industrial Enegy Losses' Seasonal Data",
       digits = array(5,ncol(seas_scores2_I))) %>%
   kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_I[,"RMSE"]))
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_I[,"MAPE"]))
 
 kbl_EL_I
 ```
 
-## Plotting everything together
+#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
+## Plotting everything together
 #Industrial Primary Energy
 autoplot(ts_electricity_I[,"Primary.Energy"]) +
   autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
@@ -1173,6 +1215,7 @@ autoplot(ts_electricity_I_PE_test) +
 
 ```
 
+#Energy Loss Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE} 
 #Industrial Energy Losses
@@ -1196,8 +1239,10 @@ autoplot(ts_electricity_I_EL_test) +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 ```
 
-### Fit Best Model 
+#Ten years' Forecast
+
 ```{r include=FALSE}
+### Fit Best Model 
 #Now fit BSM (the best model) using the entire dataset for PE consumption in industrial sector 
 
 #Create a ts object for the entire PE consumption 
@@ -1207,18 +1252,18 @@ ts_electricity_I_PE <- ts(
   frequency=12)
 
 #For primary energy consumption
-BSM_entire_PE_I <- StructTS(ts_electricity_I_PE,
-                    type="BSM",fixed=c(NA,NA,NA,NA))
-checkresiduals(BSM_entire_PE_I )
-
-#Generating forecast for the next ten years for the primary energy consumption
-BSM_entire_forecast1_I <- forecast(BSM_entire_PE_I,h=120)
-plot(BSM_entire_forecast1_I)
+SSES_seasforecast_I <- es(ts_electricity_I_PE,model="ZZZ",h=n_for2,holdout=FALSE)
+plot(SSES_seasforecast_I)
+checkresiduals(SSES_seasforecast_I)
 
 ```
 
 ```{r echo=FALSE}
-plot(BSM_entire_forecast1_I)
+autoplot(ts_electricity_I_PE) +
+  autolayer(SSES_seasforecast_I$forecast, series="SSES") +
+  xlab("Month") + ylab("Primary Energy Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
+
 ```
 
 
@@ -1234,7 +1279,7 @@ ts_electricity_I_EL <- ts(
 
 #For energy loss 
 SARIMA_entire_EL_I <- auto.arima(ts_electricity_I_EL)
-checkresiduals(SARIMA_entire_EL_I )
+checkresiduals(SARIMA_entire_EL_I)
 
 #Generating forecasts for the next ten years of energy losses
 SARIMA_entire_forecast2_I <- forecast(SARIMA_entire_EL_I,h=120)
@@ -1245,17 +1290,17 @@ plot(SARIMA_entire_forecast2_I)
 plot(SARIMA_entire_forecast2_I)
 ```
 
-
+#Best Models' Residuals 1973-2022
 
 ```{r echo=FALSE}
 #best models residuals
 #Residential sector 1973-2022
-checkresiduals(SSES_seas1)
-checkresiduals(SSES_seas1)
+checkresiduals(SS_seas1)
+checkresiduals(SSES_seas2)
 
 #Commercial sector
 checkresiduals(SARIMA_autofit1_C)
-checkresiduals(SS_seas2_C)
+checkresiduals(SARIMA_autofit2_C)
 
 #Industrial sector
 checkresiduals(SS_seas1_I)
