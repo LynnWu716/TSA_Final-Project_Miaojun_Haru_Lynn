@@ -315,6 +315,7 @@ ts_electricity_I_EL_test <- ts(
 ```
 
 Before running a time series forecast model and selecting models for time series forecasting, we examine ACF and PACF plots of the original, un-transformed time series (shown below).
+
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
 par(mfrow=c(1,6))
@@ -326,7 +327,9 @@ ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE
 PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
 
 ```
+
 For our first variable--primary energy consumption, both ACF and PACF not only show strong seasonality but also non-stationary due to slow decays.
+
 ```{r echo=FALSE}
 #ACF and PACF plots for energy losses
 
@@ -338,6 +341,7 @@ PACF_Plot2 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRU
 ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
 PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
 ```
+
 For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
 
 ## Analysis (Methods and Models)
