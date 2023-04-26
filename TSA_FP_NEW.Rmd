@@ -1,10 +1,9 @@
 ---
 title: "Forecasting Electricity Consumption & Losses For Residential, Commercial, and Industrial Sectors"
-Authors: "Lynn Wu, Haru Koga, Miaojun Pang"
-output:
-  pdf_document: default
-  html_document: default
-date: "2023-04-28"
+subtitle: "04/26/2023"
+author: "Lynn Wu, Haru Koga, Miaojun Pang"
+output: pdf_document
+geometry: margin=2.54cm
 ---
 
 ```{r setup, include=FALSE}
@@ -1358,5 +1357,20 @@ checkresiduals(SARIMA_autofit2_C)
 checkresiduals(SS_seas1_I)
 checkresiduals(SARIMA_autofit2_I)
 ```
+
+## Conclusion
+### Limitation
+
+One of the challenges we faced in this study was energy losses forecasting accuracy. For all three sectors, when we ran the 2017-2022 forecast testing, the results were not quite accurate and even showed some patterns in opposite directions. We have tried different testing time frames, before and after the COVID year of 2020, and we ended up using the 2017-2022 5-year testing window because of the better accuracy test results. 
+
+Another limitation is that our models did not consider the impacts from the external factors, such as an economic recession, political disruptions, and pandemics, on the energy consumption and energy losses data. As mentioned in the dataset information description, the industrial sector has been prominently affected by such external factors. In the next ten years, it is hardly possible to predict what will happen in economics and politics. As we have observed, electricity consumption significantly decreased during the early phase of the COVID pandemic, so extraordinary events could disturb the forecast patterns. 
+
+Moreover, the ten-year forecasting for energy consumption in the residential and commercial sectors and the energy losses in the residential sector demonstrate the constant trend. These constant trends are likely stemming from the constant trends in previous years, but that could not be the case for future years. 
+
+All three sectors show perfect performance on our first variable, primary energy consumption, but terrible performance on our second variable, energy losses, especially in the residential and commercial sectors, when we zoom in and make a detailed comparison between forecasts of historical data and the 2017-2022 prediction. Unexpected losses throughout the transmission procedure are most likely to blame for our inability to predict the precise energy loss statistics. Due to its comparatively high voltage requirements, the industrial sector has the shortest path in terms of the transmission process. However, further step-down processes occur in the commercial and residential sectors, which result in significant energy losses. There are two solutions that we could use to further enhance the precision of energy loss predictions: adding exogenous factors and adopting multiple seasonality models.
+
+### Discussion
+We can see that the projection for the next ten years differs in three areas depending on several models. This project successfully investigated a variety of models that are appropriate for primary energy use. We came to the conclusion that the SARIMA model outperformed the other models since it accounted for the best model in three forecasts when utilizing performance measures (RMSE, MAPE, MSE, and MPE) as well as a visual comparison. We were able to anticipate the future of two variables, which indicate roughly declining energy losses and rising demands for primary energy consumption. The limits of the two models we choose for future forecasting, as well as those of time series forecasting, must be acknowledged. Nevertheless, many stakeholders and policymakers in the energy and utility sectors can still benefit from anticipating energy usage and losses. We can anticipate that energy use will decline in the near future as a result of increased energy awareness and technical improvements that will reduce energy losses.
+
 
 
