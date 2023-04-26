@@ -335,17 +335,17 @@ ts_electricity_I_EL_test <- ts(
 
 ```
 
-Before running a time series forecast model and selecting models for time series forecasting, we examine ACF and PACF plots of the original, un-transformed time series (shown below).
+Before running a time series forecast model and selecting models for time series forecasting, we examine ACF and PACF plots of the original, un-transformed time series (shown below). For the following plots, we use R, C, and I to stand for residential, commericial, and industrial sectors, respectively.
 
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
 par(mfrow=c(1,6))
-  ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF",ylim=c(-0.2,0.8))
-  PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF",ylim=c(-0.2,0.8))
-  ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF",ylim=c(-0.2,0.8))
-  PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF",ylim=c(-0.2,0.8))
-  ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF",ylim=c(-0.2,0.8))
-  PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF",ylim=c(-0.2,0.8))
+  ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="R ACF",ylim=c(-0.2,0.8))
+  PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="R PACF",ylim=c(-0.2,0.8))
+  ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="C ACF",ylim=c(-0.2,0.8))
+  PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="C PACF",ylim=c(-0.2,0.8))
+  ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="I ACF",ylim=c(-0.2,0.8))
+  PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="I PACF",ylim=c(-0.2,0.8))
 
 ```
 
@@ -355,12 +355,12 @@ For our first variable--primary energy consumption, both ACF and PACF not only s
 #ACF and PACF plots for energy losses
 
 par(mfrow=c(1,6))
-  ACF_Plot4 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF",ylim=c(-0.2,0.8))
-  PACF_Plot4 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF",ylim=c(-0.2,0.8))
-  ACF_Plot5 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF",ylim=c(-0.2,0.8))
-  PACF_Plot5 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF",ylim=c(-0.2,0.8))
-  ACF_Plot6 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF",ylim=c(-0.2,0.8))
-  PACF_Plot6 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF",ylim=c(-0.2,0.8))
+  ACF_Plot4 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="R ACF",ylim=c(-0.2,0.8))
+  PACF_Plot4 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="R PACF",ylim=c(-0.2,0.8))
+  ACF_Plot5 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="C ACF",ylim=c(-0.2,0.8))
+  PACF_Plot5 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="C PACF",ylim=c(-0.2,0.8))
+  ACF_Plot6 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="I ACF",ylim=c(-0.2,0.8))
+  PACF_Plot6 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="I PACF",ylim=c(-0.2,0.8))
 ```
 
 For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
@@ -369,7 +369,19 @@ For our second variable--energy loss, both ACF and PACF still show significant v
 
 For our forecast training for all the three sectors, we run five models: Arithmetic Mean (MEAN), Seasonal Naive (SNAIVE), Seasonal ARIMA (SARIMA), State Space Exponential Smoothing (SSES), and Basic Structure Model (BSM). We created a training dataset for each sector which has observations from February 1973 to November 2017, and the forecast testing window is 5 years from November 2017 to November 2022. We fit the single-seasonality time series data from each sector to the above five models for the primary energy consumption and energy losses 5-year forecasting. Having the five models run, we identify the best model from the result values of RMSE from an accuracy test. Finally, the identified best models are used to forecast the next ten years (2022-2032) of primary energy consumption and energy losses in the three sectors. The results and discussion will be given below by sectors. 
 
+  (1) The arithmetic mean model is a simple forecasting method that assumes that the future values of a time series will be equal to the average of past values. The code implements this model to forecast primary energy consumption and energy losses.
+
+  (2) The seasonal naive model was implemented to forecast primary energy consumption and energy losses, and the plot shows that there is a significant seasonal trend in the data. The seasonal naive model takes into account the seasonality in the data and forecasts future values based on the same seasonal pattern observed in the historical data.
+  
+  (3) The plots of the SARIMA forecasts for both primary energy consumption and energy losses show a continuation of the recurring pattern observed in the historical data, indicating that the SARIMA model is capturing the seasonality in the data. However, it is important to assess the accuracy of the forecasts by checking the residuals and other model diagnostics before making any conclusions about the effectiveness of the model.
+  
+  (4) We were fitting state space models using exponential smoothing to the original (seasonal) time series data for primary energy consumption and energy losses. The SSES model uses exponential smoothing to capture the seasonality and trend in the data.
+  
+  (5) Model 5 fits state space models using StructTS() to the original (seasonal) time series data for primary energy consumption and energy losses. The StructTS() function can estimate various state space models with different types of time-varying components, including trend, seasonality, and cycle. The forecasts generated by the models are plotted for both primary energy consumption and energy losses.
+
 ## Residential sector
+
+We begin with the residential sector.
 
 ```{r include=FALSE}
 ## Model 1: Arithmetic mean
@@ -537,6 +549,10 @@ cat("The best model by RMSE is:", row.names(seas_scores1[best_model_index1_RMSE,
                             
 ```
 
+These two following plots of primary energy consumption for the residential sector show a strong relationship and seasonality, with the BSM model performing the best among the five models. The first plot shows the original data from 1973 to 2022, along with the forecasts generated by the five models. The second plot only shows the last three years of the data (2019-2022), along with the same forecasts generated by the five models.
+
+In both plots, the BSM model forecast shows a close fit to the observed data, capturing the strong seasonality and trend in the data. The other models also capture the seasonality to varying degrees, but they may not perform as well in capturing the trend. The MEAN model and the seasonal naive model capture the seasonality but assume a constant mean, which may not be appropriate for data with a trend. The SARIMA and SSES models can capture both seasonality and trend, but they may require more parameter tuning and may be more complex than the BSM model.
+
 ### Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
@@ -560,8 +576,8 @@ autoplot(ts_electricity_R_PE_test) +
   autolayer(SS_for1,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
-
 ```
+
 
 ```{r echo=FALSE}
 
@@ -573,6 +589,8 @@ kbl_PE_R<-kbl(seas_scores1,
 
 kbl_PE_R
 ```
+
+After checking five models accuracy, we created a data frame to compare the performance metrics of the five models for primary energy consumption. In this case, the best model by RMSE is the state space model using the basic structural model (BSM). Next, we created a formatted table of the forecast accuracy for the models applied to the primary energy consumption's seasonal data. 
 
 ```{r include=FALSE}
 ### Now Fit Best Model for Residential Sector
@@ -616,7 +634,14 @@ autoplot(ts_electricity_R_entire_Consumption) +
 
 ```
 
+This plot shows the forecasted primary energy consumption for the entire 50-year period (1973-2032), with the BSM model generating a 10-year forecast (120 periods) for the residential sector. The forecast indicates a continuation of the strong seasonality and trend observed in the historical data, with a slight increase in consumption towards the end of the forecast horizon.
+
 ### Energy Loss Plots (1973-2022 vs. 2017-2022)
+
+
+These following two plots of energy losses for the residential sector show a strong relationship and seasonality, and the SSES model performs the best among the five models. The first plot shows the original data from 1973 to 2022, along with the forecasts generated by the five models. The second plot only shows the last year of the data (2017-2022), along with the same forecasts generated by the five models.
+
+In both plots, the SSES model forecast shows a close fit to the observed data, capturing the strong seasonality and trend in the data. The other models also capture the seasonality to varying degrees, but they may not perform as well in capturing the trend. The MEAN model and the seasonal naive model capture the seasonality but assume a constant mean, which may not be appropriate for data with a trend. The SARIMA and BSM models can capture both seasonality and trend, but they may require more parameter tuning and may be more complex than the SSES model.
 
 ```{r echo=FALSE}
 #Residential Energy Losses
@@ -638,8 +663,9 @@ autoplot(ts_electricity_R_EL_test) +
   autolayer(SS_for2,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
-
 ```
+
+
 
 ```{r include=FALSE}
 #create data frame for residential energy losses
@@ -652,6 +678,9 @@ cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2_RMSE,
                             
 ```
 
+
+
+
 ```{r echo=FALSE}
 
 kbl_EL_R<-kbl(seas_scores2, 
@@ -663,6 +692,7 @@ kbl_EL_R<-kbl(seas_scores2,
 kbl_EL_R
 ```
 
+From the Table 3, the SSES model has the smallest RMSE, so we continually fit this model to forecast future 10 years consumption and losses.
 
 ```{r echo=FALSE}
 #10yrs
@@ -673,6 +703,7 @@ autoplot(ts_electricity_R_entire_Losses) +
 
 ```
 
+This plot shows the forecasted energy losses for the same 50-year period, with the SSES model generating a 10-year forecast (120 periods) for the residential sector. The forecast indicates a continuation of the strong seasonality and trend observed in the historical data, with a slight increase in losses towards the end of the forecast horizon.
 
 ## Commercial Sector
 
@@ -836,6 +867,8 @@ SS_scores2_C <- accuracy(SS_for2_C$mean,last_EL_obs_C_test)
 
 ### Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
+These following two plots of primary energy consumption for the residential sector show a strong relationship and seasonality, with the SARIMA model performing the best among the five models. The first plot shows the original data from 1973 to 2022, along with the forecasts generated by the five models. The second plot only shows the last three years of the data (2019-2022), along with the same forecasts generated by the five models. In both plots, the SARIMA model forecast shows a close fit to the observed data, capturing the strong seasonality and trend in the data. The other models also capture the seasonality to varying degrees, but they may not perform as well in capturing the trend. 
+
 ```{r echo=FALSE}
 ## Plotting everything together
 #Commercial Primary Energy
@@ -847,7 +880,6 @@ autoplot(ts_electricity_C[,"Primary.Energy"]) +
   autolayer(SS_for1_C,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 1973-2022"))
-
 # Only last year
 autoplot(ts_electricity_C_PE_test) +
   autolayer(MEAN_seas1_C, PI=FALSE, series="Mean") +
@@ -858,6 +890,8 @@ autoplot(ts_electricity_C_PE_test) +
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
 ```
+
+
 
 ```{r include=FALSE}
 #create data frame for primary energy consumption
@@ -879,6 +913,8 @@ kbl_PE_C<-kbl(seas_scores1_C,
   kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_C[,"RMSE"]))
 kbl_PE_C
 ```
+
+The SARIMA model has the lowest RMSE, and SNAIVE model has the lowest MAPE. But we use the value of RMSE as the threshold.
 
 ```{r include=FALSE}
 #Now fit SARIMA (the best model) using the entire dataset for PE consumption in commercial sector
@@ -921,7 +957,13 @@ autoplot(ts_electricity_C_PE) +
   guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
+This plot shows the forecasted primary energy consumption for the entire 50-year period (1973-2032), with the SARIMA model generating a 10-year forecast (120 periods) for the commercial sector. The forecast indicates a continuation of the strong seasonality and trend observed in the historical data, with a significant increase in consumption towards the end of the forecast horizon.
+
 ### Energy Loss Plots (1973-2022 vs. 2017-2022)
+
+These two following plots of commercial energy losses show a strong seasonality in the data, with the SARIMA model performing the best among the five models. The first plot shows the original data from 1973 to 2022, along with the forecasts generated by the five models. The second plot only shows the last five years of the data (2017-2022), along with the same forecasts generated by the five models.
+
+In both plots, the SARIMA model forecast shows a close fit to the observed data, capturing the strong seasonality and trend in the data. The other models also capture the seasonality to varying degrees, but they may not perform as well in capturing the trend. 
 
 ```{r echo=FALSE}
 #Commercial Energy Losses
@@ -933,7 +975,6 @@ autoplot(ts_electricity_C[,"Energy.Losses"]) +
   autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 1973-2022"))
-
 #Commercial Energy Losses - only last year
 autoplot(ts_electricity_C_EL_test) +
   autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
@@ -944,6 +985,8 @@ autoplot(ts_electricity_C_EL_test) +
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 ```
+
+
 
 ```{r include=FALSE}
 seas_scores2_C <- as.data.frame(rbind(MEAN_scores2_C, SNAIVE_scores2_C, SARIMA_scores2_C,SSES_scores2_C,SS_scores2_C))
@@ -963,6 +1006,8 @@ kbl_EL_C<-kbl(seas_scores2_C,
 kbl_EL_C
 ```
 
+From the Table 5, SARIMA model has both the lowest RMSE and MAPE. Therefore, it is the perfect fitting model to forecast future ten years' variables in the commercial sector.
+
 ```{r echo=FALSE}
 #10yrs
 autoplot(ts_electricity_C_EL) +
@@ -971,6 +1016,8 @@ autoplot(ts_electricity_C_EL) +
   guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
+We create a time series object for the entire energy loss data, fit a SARIMA model to it using the auto.arima() function, check the residuals, and generate a forecast for the next 10 years using the forecast() function.
+This plot shows the forecasted energy losses for the same 50-year period, with the SARIMA model generating a 10-year forecast (120 periods) for the commercial sector. The forecast indicates a continuation of the strong seasonality and trend observed in the historical data, with a significant increase in losses towards the end of the forecast horizon.
 
 
 ## Industrial Sector
@@ -1129,7 +1176,6 @@ autoplot(ts_electricity_I[,"Primary.Energy"]) +
   autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 1973-2022"))
-
 #Industrial Primary Energy - only last year
 autoplot(ts_electricity_I_PE_test) +
   autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
@@ -1141,6 +1187,8 @@ autoplot(ts_electricity_I_PE_test) +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 
 ```
+
+
 
 ```{r include=FALSE}
 ## Checking accuracy of the five models
@@ -1229,9 +1277,6 @@ autoplot(ts_electricity_I[,"Energy.Losses"]) +
   autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 1973-2022"))
-```
-
-```{r echo=FALSE} 
 #Industrial Energy Losses - only last year
 autoplot(ts_electricity_I_EL_test) +
   autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
@@ -1242,6 +1287,8 @@ autoplot(ts_electricity_I_EL_test) +
   xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 ```
+
+
 
 
 ```{r include=FALSE}
@@ -1294,6 +1341,8 @@ autoplot(SARIMA_entire_forecast2_I) +
 ```
 
 ## Best Models' Residuals 1973-2022
+
+The following six figures show residuals of all six best models in three sectors, and they are BSM, SSES, SARIMA, SARIMA, SSES, and SARIMA. It is not hard to tell all residuals indicate nearly normal distributions that they could fit the best forecasting models.
 
 ```{r echo=FALSE}
 #best models residuals
