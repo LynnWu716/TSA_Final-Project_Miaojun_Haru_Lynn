@@ -1,17 +1,18 @@
 ---
-title: "TSA_FinalProject_Coding"
-Group: Haru, Miaojun, Lynn
+title: "Forecasting Electricity Consumption & Losses For Residential, Commercial, and Industrial Sectors"
+Authors: "Lynn Wu, Haru Koga, Miaojun Pang"
 output:
   pdf_document: default
   html_document: default
-date: "2023-03-31"
+date: "2023-04-28"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Introduction and Objectives
+## Introduction and Objectives
+
 Energy consumption is a critical indicator for policymakers, industry stakeholders, and researchers to develop effective energy policies and solutions for an effective use of electricity and power loss reduction. However, accurately forecasting and analyzing energy consumption data can be challenging to obtain, as most data are preliminary and subject to revision.
 
 In this project, we will use time series analysis in R to forecast and analyze energy consumption data for three sectors: residential, commercial, and industrial, in the United States, from February 1973 to November 2022. Motivated by the importance of accurate and reliable energy consumption data, this project aims to contribute to a better understanding of energy trends and help inform policy and decision-making in the energy sector. By forecasting and analyzing the U.S. Energy Information Administration’s data on residential, commercial, and industrial uses, we hope to shed light on the drivers of energy consumption in these sectors and identify potential opportunities for reducing energy consumption and improving energy efficiency. 
@@ -191,31 +192,38 @@ The ranges show the fundamental seasonal shifts over the last few decades. For p
 ## Initial Plots
 #plot for electricity consumption
 cols<-c("residential"="orange","commercial"="steelblue","industrial"="yellow")
-ts_plot<-ggplot(electricity_consumption)+
+ts_plot<-ggplot(electricity_consumption, size=4)+
   geom_line(aes(x=Date,y=Residential.Primary.Energy,color="residential"))+
   ylab(paste0("Electricity Consumption (Trillion BTU)",sep="")) +
   xlab("Date")+
   geom_line(aes(x=Date,y=Commercial.Primary.Energy,color="commercial"))+
   geom_line(aes(x=Date,y=Industrial.Primary.Energy,color="industrial"))+
   labs(title="Figure 1. Primary Electricity Consumption of Three Sectors")+
+  theme(plot.margin = margin(2,.8,2,.8, "cm"))+
   scale_color_manual(name="series",values = cols)
 plot(ts_plot)
-          
+
+```
+
+The highest primary energy consumption in Figure 1 is in the industrial sector. Although there is the most seasonality in the residential sector, the commercial sector uses the least primary energy. Strong seasonality is typically more pronounced in the residential and industrial sectors in the summer and winter but less pronounced in the spring and fall. In general, residential and commercial sector patterns are nearly stable; however, exogenous influences throughout time cause the industrial sector to experience increasing and declining trends.
+
+```{r, echo=FALSE}
+## Initial Plots
 #plot for energy losses
 cols1<-c("residential"="green","commercial"="red","industrial"="blue")
-ts_plot1<-ggplot(electricity_consumption)+
+ts_plot1<-ggplot(electricity_consumption, size=4)+
   geom_line(aes(x=Date,y=Residential.Energy.Losses,color="residential"))+
   ylab(paste0("Energy Losses (Trillion BTU)",sep="")) +
   xlab("Date")+
   geom_line(aes(x=Date,y=Commercial.Energy.Losses,color="commercial"))+
   geom_line(aes(x=Date,y=Industrial.Energy.Losses,color="industrial"))+
   labs(title="Figure 2. Energy Losses of Three Sectors")+
+  theme(plot.margin = margin(2,.8,2,.8, "cm"))+
   scale_color_manual(name="series",values = cols1)
 plot(ts_plot1)
 
 ```
 
-The highest primary energy consumption in Figure 1 is in the industrial sector. Although there is the most seasonality in the residential sector, the commercial sector uses the least primary energy. Strong seasonality is typically more pronounced in the residential and industrial sectors in the summer and winter but less pronounced in the spring and fall. In general, residential and commercial sector patterns are nearly stable; however, exogenous influences throughout time cause the industrial sector to experience increasing and declining trends.
 In contrast to the commercial and residential sectors in Figure 2, the electrical losses in the industrial sectors are decreasing. In three sectors, electricity losses are highest in the residential sector while being lowest in the industrial sector. Three industries saw an increasing tendency in energy losses prior to 2000, but after that year, they saw decreasing trends.
 
 We initially build three sub-data frames containing the two variables primary electricity consumption and energy losses for each of the three sectors. All data were converted to time series data. To compute five one seasonality models, forecast consumption and losses from 2017 to 2022, and determine the most effective forecasting models for the next 10 years, all three sectors also contain one testing dataset and one training dataset between 1973 and 2017.
@@ -331,17 +339,13 @@ Before running a time series forecast model and selecting models for time series
 
 ```{r echo=FALSE}
 #ACF and PACF plots for primary energy consumption
-par(mfrow=c(1,2))
-ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF")
-PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF")
-
-par(mfrow=c(1,2))
-ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF")
-PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF")
-
-par(mfrow=c(1,2))
-ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF")
-PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF")
+par(mfrow=c(1,6))
+  ACF_Plot1 <- Acf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential ACF",ylim=c(-0.2,0.8))
+  PACF_Plot1 <- Pacf(electricity_consumption_R$Primary.Energy, lag = 30, plot = TRUE,main="Residential PACF",ylim=c(-0.2,0.8))
+  ACF_Plot2 <- Acf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial ACF",ylim=c(-0.2,0.8))
+  PACF_Plot2 <- Pacf(electricity_consumption_C$Primary.Energy, lag = 30, plot = TRUE,main="Commercial PACF",ylim=c(-0.2,0.8))
+  ACF_Plot3 <- Acf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial ACF",ylim=c(-0.2,0.8))
+  PACF_Plot3 <- Pacf(electricity_consumption_I$Primary.Energy, lag = 30, plot = TRUE,main="Industrial PACF",ylim=c(-0.2,0.8))
 
 ```
 
@@ -350,24 +354,22 @@ For our first variable--primary energy consumption, both ACF and PACF not only s
 ```{r echo=FALSE}
 #ACF and PACF plots for energy losses
 
-par(mfrow=c(1,2))
-ACF_Plot1 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF")
-PACF_Plot1 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF")
-
-par(mfrow=c(1,2))
-ACF_Plot2 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF")
-PACF_Plot2 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF")
-
-par(mfrow=c(1,2))
-ACF_Plot3 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF")
-PACF_Plot3 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF")
+par(mfrow=c(1,6))
+  ACF_Plot4 <- Acf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential ACF",ylim=c(-0.2,0.8))
+  PACF_Plot4 <- Pacf(electricity_consumption_R$Energy.Losses, lag = 30, plot = TRUE,main="Residential PACF",ylim=c(-0.2,0.8))
+  ACF_Plot5 <- Acf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial ACF",ylim=c(-0.2,0.8))
+  PACF_Plot5 <- Pacf(electricity_consumption_C$Energy.Losses, lag = 30, plot = TRUE,main="Commercial PACF",ylim=c(-0.2,0.8))
+  ACF_Plot6 <- Acf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial ACF",ylim=c(-0.2,0.8))
+  PACF_Plot6 <- Pacf(electricity_consumption_I$Energy.Losses, lag = 30, plot = TRUE,main="Industrial PACF",ylim=c(-0.2,0.8))
 ```
 
 For our second variable--energy loss, both ACF and PACF still show significant values beyond thresholds, especially at lags=12 and 24.
 
-
 ## Analysis (Methods and Models)
 
+For our forecast training for all the three sectors, we run five models: Arithmetic Mean (MEAN), Seasonal Naive (SNAIVE), Seasonal ARIMA (SARIMA), State Space Exponential Smoothing (SSES), and Basic Structure Model (BSM). We created a training dataset for each sector which has observations from February 1973 to November 2017, and the forecast testing window is 5 years from November 2017 to November 2022. We fit the single-seasonality time series data from each sector to the above five models for the primary energy consumption and energy losses 5-year forecasting. Having the five models run, we identify the best model from the result values of RMSE from an accuracy test. Finally, the identified best models are used to forecast the next ten years (2022-2032) of primary energy consumption and energy losses in the three sectors. The results and discussion will be given below by sectors. 
+
+## Residential sector
 
 ```{r include=FALSE}
 ## Model 1: Arithmetic mean
@@ -382,11 +384,11 @@ checkresiduals(MEAN_seas2)
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas1)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas2)
 ```
 
@@ -404,11 +406,11 @@ checkresiduals(SNAIVE_seas2)
 plot(SNAIVE_seas2)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas1)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas2)
 ```
 
@@ -430,11 +432,11 @@ SARIMA_for2 <- forecast(SARIMA_autofit2,h=n_for)
 plot(SARIMA_for2)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for1)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for2)
 ```
 
@@ -453,7 +455,7 @@ plot(SSES_seas2)
 checkresiduals(SSES_seas2)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forPE_R_train) +
   autolayer(SSES_seas1$forecast, series="SSES") +
   xlab("Month") + ylab("Primary Energy Consumption (Trillion BTU)") +
@@ -461,7 +463,7 @@ autoplot(ts_forPE_R_train) +
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forEL_R_train) +
   autolayer(SSES_seas2$forecast, series="SSES") +
   xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
@@ -490,11 +492,11 @@ SS_for2 <- forecast(SS_seas2,h=n_for)
 plot(SS_for2)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for1)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for2)
 ```
 
@@ -535,43 +537,7 @@ cat("The best model by RMSE is:", row.names(seas_scores1[best_model_index1_RMSE,
                             
 ```
 
-
-
-```{r echo=FALSE}
-
-kbl_PE_R<-kbl(seas_scores1, 
-      caption = "Forecast Accuracy for Residential Primary Energy Consumption's Seasonal Data",
-      digits = array(5,ncol(seas_scores1))) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1[,"RMSE"]))
-
-kbl_PE_R
-```
-
-```{r include=FALSE}
-#create data frame for residential energy losses
-seas_scores2 <- as.data.frame(rbind(MEAN_scores2, SNAIVE_scores2, SARIMA_scores2,SSES_scores2,SS_scores2))
-row.names(seas_scores2) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
-
-#choose model with lowest RMSE
-best_model_index2_RMSE <- which.min(seas_scores2[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2_RMSE,]))      
-                            
-```
-
-
-```{r echo=FALSE}
-
-kbl_EL_R<-kbl(seas_scores2, 
-      caption = "Forecast Accuracy for Residential Enegy Losses' Seasonal Data",
-      digits = array(5,ncol(seas_scores2))) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2[,"RMSE"]))
-
-kbl_EL_R
-```
-
-#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
+### Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 ## Plotting everything together
@@ -585,7 +551,7 @@ autoplot(ts_electricity_R[,"Primary.Energy"]) +
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 1973-2022"))
 
-#Residential Primary Energy - only last year
+#Residential Primary Energy - only last five years
 autoplot(ts_electricity_R_PE_test) +
   autolayer(MEAN_seas1, PI=FALSE, series="Mean") +
   autolayer(SNAIVE_seas1, PI=FALSE, series="Naïve") +
@@ -594,30 +560,18 @@ autoplot(ts_electricity_R_PE_test) +
   autolayer(SS_for1,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
+
 ```
-#Energy Loss Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
-#Residential Energy Losses
-autoplot(ts_electricity_R[,"Energy.Losses"]) +
-  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2$forecast, series="SSES") +
-  autolayer(SS_for2,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 1973-2022"))
 
-#Residential Energy Losses - only last year
-autoplot(ts_electricity_R_EL_test) +
-  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2$forecast, series="SSES") +
-  autolayer(SS_for2,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 2017-2022"))
+kbl_PE_R<-kbl(seas_scores1, 
+      caption = "Forecast Accuracy for Residential Primary Energy Consumption's Seasonal Data",
+      digits = array(5,ncol(seas_scores1))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1[,"RMSE"]))
 
+kbl_PE_R
 ```
 
 ```{r include=FALSE}
@@ -652,8 +606,6 @@ plot(SSES_R_EL_entire)
 
 ```
 
-#Ten years' Forecast
-
 ```{r echo=FALSE}
 #10yrs
 
@@ -662,7 +614,58 @@ autoplot(ts_electricity_R_entire_Consumption) +
   xlab("Month") + ylab("Energy Consumption (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2022-2032"))
 
+```
 
+### Energy Loss Plots (1973-2022 vs. 2017-2022)
+
+```{r echo=FALSE}
+#Residential Energy Losses
+autoplot(ts_electricity_R[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2$forecast, series="SSES") +
+  autolayer(SS_for2,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 1973-2022"))
+
+#Residential Energy Losses - only last year
+autoplot(ts_electricity_R_EL_test) +
+  autolayer(MEAN_seas2, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2$forecast, series="SSES") +
+  autolayer(SS_for2,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2017-2022"))
+
+```
+
+```{r include=FALSE}
+#create data frame for residential energy losses
+seas_scores2 <- as.data.frame(rbind(MEAN_scores2, SNAIVE_scores2, SARIMA_scores2,SSES_scores2,SS_scores2))
+row.names(seas_scores2) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+
+#choose model with lowest RMSE
+best_model_index2_RMSE <- which.min(seas_scores2[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores2[best_model_index2_RMSE,]))      
+                            
+```
+
+```{r echo=FALSE}
+
+kbl_EL_R<-kbl(seas_scores2, 
+      caption = "Forecast Accuracy for Residential Enegy Losses' Seasonal Data",
+      digits = array(5,ncol(seas_scores2))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2[,"RMSE"]))
+
+kbl_EL_R
+```
+
+
+```{r echo=FALSE}
+#10yrs
 autoplot(ts_electricity_R_entire_Losses) +
   autolayer(SSES_R_EL_entire$forecast, series="SSES") +
   xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
@@ -671,7 +674,7 @@ autoplot(ts_electricity_R_entire_Losses) +
 ```
 
 
-##Commercial Sector
+## Commercial Sector
 
 ```{r include=FALSE}
 # Create a variable with number of steps ahead we will forecast
@@ -701,11 +704,11 @@ checkresiduals(MEAN_seas2_C)
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas1_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas2_C)
 ```
 
@@ -720,11 +723,11 @@ SNAIVE_seas2_C <- snaive(ts_forEL_C_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas2_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas1_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas2_C)
 ```
 
@@ -745,11 +748,11 @@ SARIMA_for2_C <- forecast(SARIMA_autofit2_C,h=n_for)
 plot(SARIMA_for2_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for1_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for2_C)
 ```
 
@@ -767,7 +770,7 @@ SSES_seas2_C <- es(ts_forEL_C_train,model="XXX",h=n_for,holdout=FALSE)
 checkresiduals(SSES_seas2_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forPE_C_train) +
   autolayer(SSES_seas1_C$forecast, series="SSES") +
   xlab("Month") + ylab("Primary Energy Consumption (Trillion BTU)") +
@@ -775,15 +778,12 @@ autoplot(ts_forPE_C_train) +
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forEL_C_train) +
   autolayer(SSES_seas2_C$forecast, series="SSES") +
   xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
   guides(colour=guide_legend(title="Forecast 2017-2022"))
 ```
-
-
-
 
 ```{r include=FALSE}
 ### Model 5: SS with StructTS()
@@ -803,14 +803,13 @@ SS_for1_C <- forecast(SS_seas1_C,h=n_for)
 SS_for2_C <- forecast(SS_seas2_C,h=n_for)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for1_C)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for2_C)
 ```
-
 
 ```{r include=FALSE}
 ## Checking accuracy of the five models
@@ -835,47 +834,7 @@ SS_scores1_C <- accuracy(SS_for1_C$mean,last_PE_obs_C_test)
 SS_scores2_C <- accuracy(SS_for2_C$mean,last_EL_obs_C_test)
 ```
 
-```{r include=FALSE}
-#create data frame for primary energy consumption
-seas_scores1_C <- as.data.frame(rbind(MEAN_scores1_C, SNAIVE_scores1_C, SARIMA_scores1_C,SSES_scores1,SS_scores1_C))
-row.names(seas_scores1_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
-
-#choose model with lowest RMSE
-best_model_index1_C_RMSE <- which.min(seas_scores1_C[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores1_C[best_model_index1_C_RMSE,]))   
-      
-                            
-```
-
-
-```{r echo=FALSE}
-kbl_PE_C<-kbl(seas_scores1_C, 
-      caption = "Forecast Accuracy for Commercial Primary Energy Consumption's Seasonal Data",
-      digits = array(5,ncol(seas_scores1_C))) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_C[,"RMSE"]))
-kbl_PE_C
-```
-```{r include=FALSE}
-seas_scores2_C <- as.data.frame(rbind(MEAN_scores2_C, SNAIVE_scores2_C, SARIMA_scores2_C,SSES_scores2_C,SS_scores2_C))
-row.names(seas_scores2_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
-#choose model with lowest RMSE
-best_model_index2_C_RMSE <- which.min(seas_scores2_C[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C_RMSE,])) 
-
-```
-
-
-```{r echo=FALSE}
-kbl_EL_C<-kbl(seas_scores2_C, 
-      caption = "Forecast Accuracy for Commercial Energy Losses' Seasonal Data",
-      digits = array(5,ncol(seas_scores2_C))) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_C[,"RMSE"]))
-kbl_EL_C
-```
-
-#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
+### Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
 
 ```{r echo=FALSE}
 ## Plotting everything together
@@ -900,28 +859,25 @@ autoplot(ts_electricity_C_PE_test) +
   guides(colour=guide_legend(title="Forecast 2019-2022"))
 ```
 
-#Energy Loss Plots (1973-2022 vs. 2017-2022)
+```{r include=FALSE}
+#create data frame for primary energy consumption
+seas_scores1_C <- as.data.frame(rbind(MEAN_scores1_C, SNAIVE_scores1_C, SARIMA_scores1_C,SSES_scores1,SS_scores1_C))
+row.names(seas_scores1_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+
+#choose model with lowest RMSE
+best_model_index1_C_RMSE <- which.min(seas_scores1_C[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores1_C[best_model_index1_C_RMSE,]))   
+      
+                            
+```
 
 ```{r echo=FALSE}
-#Commercial Energy Losses
-autoplot(ts_electricity_C[,"Energy.Losses"]) +
-  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2_C$forecast, series="SSES") +
-  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 1973-2022"))
-
-#Commercial Energy Losses - only last year
-autoplot(ts_electricity_C_EL_test) +
-  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2_C$forecast, series="SSES") +
-  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 2017-2022"))
+kbl_PE_C<-kbl(seas_scores1_C, 
+      caption = "Forecast Accuracy for Commercial Primary Energy Consumption's Seasonal Data",
+      digits = array(5,ncol(seas_scores1_C))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores1_C[,"RMSE"]))
+kbl_PE_C
 ```
 
 ```{r include=FALSE}
@@ -956,14 +912,55 @@ SARIMA_entire_forecast3_C <- forecast(SARIMA_entire_EL_C,h=120)
 
 ```
 
-#Ten years' Forecast
-
 ```{r echo=FALSE}
 #10yrs
 autoplot(ts_electricity_C_PE) +
   autolayer(SARIMA_entire_forecast2_C, series="SARIMA") +
   xlab("Month") + ylab("Energy Consumption (Trillion BTU)") +
+  theme(plot.margin = margin(2,.8,2,.8, "cm"))+
   guides(colour=guide_legend(title="Forecast 2022-2032"))
+```
+
+### Energy Loss Plots (1973-2022 vs. 2017-2022)
+
+```{r echo=FALSE}
+#Commercial Energy Losses
+autoplot(ts_electricity_C[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_C$forecast, series="SSES") +
+  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 1973-2022"))
+
+#Commercial Energy Losses - only last year
+autoplot(ts_electricity_C_EL_test) +
+  autolayer(MEAN_seas2_C, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_C, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_C,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_C$forecast, series="SSES") +
+  autolayer(SS_for2_C,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2017-2022"))
+```
+
+```{r include=FALSE}
+seas_scores2_C <- as.data.frame(rbind(MEAN_scores2_C, SNAIVE_scores2_C, SARIMA_scores2_C,SSES_scores2_C,SS_scores2_C))
+row.names(seas_scores2_C) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+#choose model with lowest RMSE
+best_model_index2_C_RMSE <- which.min(seas_scores2_C[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores2_C[best_model_index2_C_RMSE,])) 
+
+```
+
+```{r echo=FALSE}
+kbl_EL_C<-kbl(seas_scores2_C, 
+      caption = "Forecast Accuracy for Commercial Energy Losses' Seasonal Data",
+      digits = array(5,ncol(seas_scores2_C))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_C[,"RMSE"]))
+kbl_EL_C
 ```
 
 ```{r echo=FALSE}
@@ -975,7 +972,12 @@ autoplot(ts_electricity_C_EL) +
 ```
 
 
-### Industrial Sector
+
+## Industrial Sector
+
+### Industrial Primary Energy Consumption
+
+First, the primary energy consumption time series data has been fit into the five models for 5 year forecasting from 2017 to 2022 for the testing purpose.  While the MEAN model did not quite work well and showed no forecasting pattern, the other models turned out a messy wavy pattern with great variability. Yet, compared to the original data from 2017 to 2022, the forecasts are not as accurate as we expected. While the forecasts display the same repeating pattern every year in the five years, the actual data has a huge variability. With such big variability, it is hard to demonstrate very accurate forecasting. We determined that the best model for this data is SSES, given the small values of RMSE and MAPE from the accuracy test below.
 
 ```{r include=FALSE}
 # Create a variable with number of steps ahead we will forecast
@@ -1006,14 +1008,13 @@ checkresiduals(MEAN_seas2_I)
 plot(MEAN_seas2_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas1_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(MEAN_seas2_I)
 ```
-
 
 ```{r include=FALSE}
 ## Model 2: Seasonal naive
@@ -1026,14 +1027,13 @@ SNAIVE_seas2_I <- snaive(ts_forEL_I_train, h=n_for, holdout=FALSE)
 checkresiduals(SNAIVE_seas2_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas1_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SNAIVE_seas2_I)
 ```
-
 
 ```{r include=FALSE}
 ## Model 3: SARIMA
@@ -1051,14 +1051,13 @@ SARIMA_for2_I <- forecast(SARIMA_autofit2_I,h=n_for)
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for1_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SARIMA_for2_I)
 ```
-
 
 ```{r include=FALSE}
 ## Fitting State Space Models to the original (seasonal) series
@@ -1074,7 +1073,7 @@ plot(SSES_seas2_I)
 checkresiduals(SSES_seas2_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forPE_I_train) +
   autolayer(SSES_seas1_I$forecast, series="SSES") +
   xlab("Month") + ylab("Primary Energy Consumption (Trillion BTU)") +
@@ -1082,7 +1081,7 @@ autoplot(ts_forPE_I_train) +
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 autoplot(ts_forEL_I_train) +
   autolayer(SSES_seas2_I$forecast, series="SSES") +
   xlab("Month") + ylab("Energy Losses (Trillion BTU)") +
@@ -1109,14 +1108,39 @@ SS_for2_I <- forecast(SS_seas2_I,h=n_for)
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for1_I)
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 plot(SS_for2_I)
 ```
 
+### Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
+
+```{r echo=FALSE}
+## Plotting everything together
+#Industrial Primary Energy
+autoplot(ts_electricity_I[,"Primary.Energy"]) +
+  autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1_I$forecast, series="SSES") +
+  autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 1973-2022"))
+
+#Industrial Primary Energy - only last year
+autoplot(ts_electricity_I_PE_test) +
+  autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas1_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for1_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas1_I$forecast, series="SSES") +
+  autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2017-2022"))
+
+```
 
 ```{r include=FALSE}
 ## Checking accuracy of the five models
@@ -1147,12 +1171,11 @@ seas_scores1_I <- as.data.frame(rbind(MEAN_scores1_I, SNAIVE_scores1_I, SARIMA_s
 row.names(seas_scores1_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
 
 #choose model with lowest RMSE
-best_model_index1_I_MAPE <- which.min(seas_scores1_I[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores1_I[best_model_index1_I_MAPE,]))        
+best_model_index1_I_RMSE <- which.min(seas_scores1_I[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores1_I[best_model_index1_I_RMSE,]))        
   
                             
 ```
-
 
 ```{r echo=FALSE}
 
@@ -1165,81 +1188,7 @@ kbl_PE_I<-kbl(seas_scores1_I,
 kbl_PE_I
 ```
 
-
-```{r include=FALSE}
-#create data frame for industrial energy losses
-seas_scores2_I <- as.data.frame(rbind(MEAN_scores2_I, SNAIVE_scores2_I, SARIMA_scores2_I,SSES_scores2_I,SS_scores2_I))
-row.names(seas_scores2_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
-
-#choose model with lowest RMSE
-best_model_index2_I_MAPE <- which.min(seas_scores2_I[,"MAPE"])
-cat("The best model by MAPE is:", row.names(seas_scores2_I[best_model_index2_I_MAPE,]))      
-                            
-```
-
-
-```{r echo=FALSE}
-
-kbl_EL_I<-kbl(seas_scores2_I, 
-      caption = "Forecast Accuracy for Industrial Enegy Losses' Seasonal Data",
-      digits = array(5,ncol(seas_scores2_I))) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_I[,"MAPE"]))
-
-kbl_EL_I
-```
-
-#Primary Energy Consumption Plots (1973-2022 vs. 2017-2022)
-
-```{r echo=FALSE}
-## Plotting everything together
-#Industrial Primary Energy
-autoplot(ts_electricity_I[,"Primary.Energy"]) +
-  autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas1_I, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for1_I,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas1_I$forecast, series="SSES") +
-  autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 1973-2022"))
-
-#Industrial Primary Energy - only last year
-autoplot(ts_electricity_I_PE_test) +
-  autolayer(MEAN_seas1_I, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas1_I, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for1_I,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas1_I$forecast, series="SSES") +
-  autolayer(SS_for1_I,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Consumption (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 2017-2022"))
-
-```
-
-#Energy Loss Plots (1973-2022 vs. 2017-2022)
-
-```{r echo=FALSE} 
-#Industrial Energy Losses
-autoplot(ts_electricity_I[,"Energy.Losses"]) +
-  autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2_I$forecast, series="SSES") +
-  autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 1973-2022"))
-
-#Industrial Energy Losses - only last year
-autoplot(ts_electricity_I_EL_test) +
-  autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
-  autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
-  autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
-  autolayer(SSES_seas2_I$forecast, series="SSES") +
-  autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
-  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
-  guides(colour=guide_legend(title="Forecast 2017-2022"))
-```
-
-#Ten years' Forecast
+Then, here’s the ten year forecasting for the industrial sector primary energy consumption. SSES model clearly shows the increasing trend of energy consumption in the industrial sector from 2022 to 2032. This can be understood as a sign of expanding electrification in the sector. Compared to the other two sectors, the industrial sector has experienced a rapid installation of electrified machines, energy-intensive manufacturing systems, and increasing production due to growing demand in general. Thus, the primary energy consumption in the industrial sector will likely increase in the next ten years. A possible challenge could be how the sector will accommodate the increasing electricity needs while achieving their carbon emission reduction objectives. 
 
 ```{r include=FALSE}
 ### Fit Best Model 
@@ -1266,7 +1215,58 @@ autoplot(ts_electricity_I_PE) +
 
 ```
 
+### Industrial Energy Loss
 
+Second, the energy losses forecasts showed similar results as the energy consumption. BSM, Naive, SARIMA, and SSES models displayed the similar patterns for the 2017-2022, and the MEAN model did not do a good job. The industrial sector energy losses data contain an odd variability which is not quite the same as a simple seasonality. Although the forecast models captured the odd pattern to some extent, the forecast data are not completely matching with the original data. From the accuracy test, we identified the best model for this forecasting is SARIMA as the training SARIMA model had the smallest RMSE and MAPE values. 
+
+```{r echo=FALSE} 
+#Industrial Energy Losses
+autoplot(ts_electricity_I[,"Energy.Losses"]) +
+  autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_I$forecast, series="SSES") +
+  autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 1973-2022"))
+```
+
+```{r echo=FALSE} 
+#Industrial Energy Losses - only last year
+autoplot(ts_electricity_I_EL_test) +
+  autolayer(MEAN_seas2_I, PI=FALSE, series="Mean") +
+  autolayer(SNAIVE_seas2_I, PI=FALSE, series="Naïve") +
+  autolayer(SARIMA_for2_I,PI=FALSE, series="SARIMA") +
+  autolayer(SSES_seas2_I$forecast, series="SSES") +
+  autolayer(SS_for2_I,PI=FALSE,series="BSM") + 
+  xlab("Month") + ylab("Electricity Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2017-2022"))
+```
+
+
+```{r include=FALSE}
+#create data frame for industrial energy losses
+seas_scores2_I <- as.data.frame(rbind(MEAN_scores2_I, SNAIVE_scores2_I, SARIMA_scores2_I,SSES_scores2_I,SS_scores2_I))
+row.names(seas_scores2_I) <- c("MEAN", "SNAIVE","SARIMA","SSES","BSM")
+
+#choose model with lowest RMSE
+best_model_index2_I_RMSE <- which.min(seas_scores2_I[,"RMSE"])
+cat("The best model by RMSE is:", row.names(seas_scores2_I[best_model_index2_I_RMSE,]))      
+                            
+```
+
+```{r echo=FALSE}
+
+kbl_EL_I<-kbl(seas_scores2_I, 
+      caption = "Forecast Accuracy for Industrial Enegy Losses' Seasonal Data",
+      digits = array(5,ncol(seas_scores2_I))) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_styling(latex_options="striped", stripe_index = which.min(seas_scores2_I[,"MAPE"]))
+
+kbl_EL_I
+```
+
+The 2022-2032 ten year forecasting for the industrial sector energy losses is shown below. In contrast to the energy consumption forecasting, the SARIMA model turns out having a decreasing trend forecasting for the energy losses. Given that the energy losses have been decreasing especially since after 2000, we can assume that increased energy efficiency in the industrial systems have contributed to the decline. Technological advancement in manufacturing energy efficiency has so much potential to reduce the energy losses in the industrial sector. It should be a good incentive for many industrial sector performers to enhance their energy efficiency for more effective use of electricity with lower energy losses. 
 
 ```{r include=FALSE}
 #Fit SARIMA using the entire dataset for energy loss in industrial sector 
@@ -1287,10 +1287,13 @@ plot(SARIMA_entire_forecast2_I)
 ```
 
 ```{r echo=FALSE}
-plot(SARIMA_entire_forecast2_I)
+
+autoplot(SARIMA_entire_forecast2_I) +
+  xlab("Month") + ylab("Industrial Energy Losses (Trillion BTU)") +
+  guides(colour=guide_legend(title="Forecast 2022-2032"))
 ```
 
-#Best Models' Residuals 1973-2022
+## Best Models' Residuals 1973-2022
 
 ```{r echo=FALSE}
 #best models residuals
